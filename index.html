@@ -980,6 +980,8 @@ zh:{
   copied:'邀請文字已複製',codeIs:c=>`房號是 ${c}，告訴朋友吧！`,
   inviteText:c=>`來玩糖糖拉密！\n房號：${c}`,yourTurn:'輪到你囉',
   mStart:'遊戲開始！',mPlay:(w,n)=>`${w} 出了 ${n} 張牌`,mDraw:w=>`${w} 抽了一張牌`,mPass:w=>`${w} 沒牌可抽，跳過`,mWin:w=>`${w} 贏啦！`,mLeft:w=>`${w} 離開了，牌已放回牌堆`,
+  mAway:w=>`${w} 斷線了，由電腦代打`,mBack:w=>`${w} 回來了`,mHostMv:w=>`原房主 ${w} 斷線，已換人當房主，由電腦代打`,reconnecting:'連線中斷，正在重新連線…',autoTag:'代打',
+  rejoin:c=>`回到剛剛的牌局（房號 ${c}）`,
   menuTitle:'選單',skipOther:'讓目前的玩家抽牌跳過',kick:'請目前的玩家離開',leaveGame:'離開遊戲',keepPlaying:'繼續玩',
   rulesTitle:'玩法說明',gotIt:'知道了',jokerTag:'萬用',
   rvGoal:'每人 14 張牌，輪流出牌或抽牌，先把手牌出完的人獲勝。',
@@ -1057,6 +1059,8 @@ en:{
   copied:'Invite copied',codeIs:c=>`Room code is ${c} — tell your friends!`,
   inviteText:c=>`Let’s play Tangtang Rummi!\nRoom code: ${c}`,yourTurn:'Your turn',
   mStart:'Game on!',mPlay:(w,n)=>`${w} played ${n} tiles`,mDraw:w=>`${w} drew a tile`,mPass:w=>`${w} had nothing to draw — skipped`,mWin:w=>`${w} wins!`,mLeft:w=>`${w} left — tiles returned to the pool`,
+  mAway:w=>`${w} disconnected — the computer plays for them`,mBack:w=>`${w} is back`,mHostMv:w=>`Host ${w} dropped — a new host took over and the computer plays for them`,reconnecting:'Connection lost — reconnecting…',autoTag:'Auto',
+  rejoin:c=>`Back to your game (room ${c})`,
   menuTitle:'Menu',skipOther:'Draw & skip for the current player',kick:'Remove the current player',leaveGame:'Leave game',keepPlaying:'Keep playing',
   rulesTitle:'How to play',gotIt:'Got it',jokerTag:'WILD',
   rvGoal:'Everyone gets 14 tiles. Take turns playing or drawing — the first to empty their rack wins.',
@@ -1134,6 +1138,8 @@ ko:{
   copied:'초대 문구를 복사했어요',codeIs:c=>`방 코드는 ${c}예요. 친구에게 알려 주세요!`,
   inviteText:c=>`루미 같이 해요!\n방 코드: ${c}`,yourTurn:'내 차례예요',
   mStart:'게임 시작!',mPlay:(w,n)=>`${w}: 타일 ${n}장을 냈어요`,mDraw:w=>`${w}: 타일을 한 장 뽑았어요`,mPass:w=>`${w}: 뽑을 타일이 없어 넘겼어요`,mWin:w=>`${w} 승리!`,mLeft:w=>`${w} 님이 나갔어요. 타일은 더미로 돌아갔어요`,
+  mAway:w=>`${w} 연결이 끊겨 컴퓨터가 대신 플레이해요`,mBack:w=>`${w} 돌아왔어요`,mHostMv:w=>`방장 ${w} 연결 끊김 — 새 방장이 이어받고 컴퓨터가 대신 플레이해요`,reconnecting:'연결이 끊겼어요. 다시 연결 중…',autoTag:'자동',
+  rejoin:c=>`방금 하던 게임으로 (방 ${c})`,
   menuTitle:'메뉴',skipOther:'현재 플레이어 대신 뽑고 넘기기',kick:'현재 플레이어 내보내기',leaveGame:'게임 나가기',keepPlaying:'계속하기',
   rulesTitle:'게임 방법',gotIt:'알겠어요',jokerTag:'조커',
   rvGoal:'각자 타일 14장으로 시작해 차례대로 내거나 뽑아요. 손패를 먼저 비우는 사람이 승리해요.',
@@ -1160,6 +1166,157 @@ ko:{
   }
 }};
 
+/* =====================================================================
+   廣告系統（第一階段：架構 + 測試廣告）
+   規則：遊戲進行中「完全不出現」廣告。只有兩個地方：
+     1. 一局結束後（結算畫面 → 再來一局／回主選單之間）的插頁廣告
+     2. 玩家自己進入「兌換」頁，主動按下才播放的獎勵廣告
+   橫幅只放在結算畫面與兌換頁底部，預設關閉。
+   三層：規則層（Ads）→ 轉接層（mock / admob / none）→ 事件層（Ads.on）
+   ===================================================================== */
+const ADS_CFG={
+  enabled:false,                       /* 總開關：預設關。開發者面板可開；正式版由設定檔決定 */
+  interstitial:{skipFirst:3,everyN:3,minGapSec:180},   /* 前 3 局不出，之後每 3 局一次，至少間隔 3 分鐘 */
+  banner:{enabled:false},              /* 橫幅：只在結算與兌換頁，預設關 */
+  rewarded:{dailyCap:5,bankMax:5},     /* 每日上限、最多存幾次提示 */
+  timeoutMs:6000                       /* 載入逾時：超過就當作沒廣告，不讓玩家等 */
+};
+/* Google 官方公開的「測試用」廣告 ID（開發期只准用這些；正式上架前再換成自己的）。
+   接 SDK 時請對照 AdMob 官方文件再確認一次。 */
+const ADS_TEST_IDS={
+  android:{app:'ca-app-pub-3940256099942544~3347511713',banner:'ca-app-pub-3940256099942544/6300978111',interstitial:'ca-app-pub-3940256099942544/1033173712',rewarded:'ca-app-pub-3940256099942544/5224354917'},
+  ios:{app:'ca-app-pub-3940256099942544~1458002511',banner:'ca-app-pub-3940256099942544/2934735716',interstitial:'ca-app-pub-3940256099942544/4411468910',rewarded:'ca-app-pub-3940256099942544/1712485313'}
+};
+const adDay=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const adWithTimeout=(p,ms,dflt)=>new Promise(res=>{let done=false;const t=setTimeout(()=>{if(!done){done=true;res(dflt)}},ms);Promise.resolve(p).then(v=>{if(!done){done=true;clearTimeout(t);res(v)}},()=>{if(!done){done=true;clearTimeout(t);res(dflt)}})});
+
+/* 之後要接上的位置（目前「完全沒有接線」，遊戲程式沒有任何改動）：
+   1. 一局結束記錄時           → Ads.onGameEnd()                （rt2.js 的 recordResult）
+   2. 結算畫面按「再來一局／回主選單」前 → await Ads.showInterstitial()（rt2.js 的 again／leave）
+   3. 兌換頁的「看廣告領取」     → await Ads.showRewarded()
+   4. 結算畫面／兌換頁底部       → Ads.bannerOn 為真才放橫幅位置
+   5. VIP 購買完成               → Ads.st.vip=true; Ads.save()
+   6. 收益與曝光分析             → Ads.on(e=>送到 Firebase Analytics)；金額以 AdMob 後台為準
+   新增廣告形式：在轉接層（MOCK／ADMOB）加 load/show 的新 kind，再於規則層加一條規則即可。 */
+const Ads={
+  KEY:'rummi:ads',
+  st:null,log:[],lis:[],adapter:null,
+  def(){return{games:0,sinceAd:0,lastAd:0,imp:{interstitial:0,rewarded:0,banner:0},done:{rewarded:0},fail:0,
+    day:adDay(),rwToday:0,bank:0,vip:false,dev:false,on:null,banner:null,failSim:false}},
+  load(){
+    let o=null;try{o=JSON.parse(localStorage.getItem(this.KEY)||'null')}catch(e){}
+    this.st=Object.assign(this.def(),o&&typeof o==='object'?o:{});
+    this.st.imp=Object.assign({interstitial:0,rewarded:0,banner:0},this.st.imp);this.st.done=Object.assign({rewarded:0},this.st.done);
+    if(this.st.day!==adDay()){this.st.day=adDay();this.st.rwToday=0}
+    this.adapter=this.pick();
+  },
+  save(){try{localStorage.setItem(this.KEY,JSON.stringify(this.st))}catch(e){}},
+  native(){try{return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){return false}},
+  pick(){return this.native()?ADMOB:MOCK},
+  /* ---- 開關 ---- */
+  get enabled(){return this.st.on===null?ADS_CFG.enabled:!!this.st.on},
+  get vip(){return !!this.st.vip},
+  get bannerOn(){return this.enabled&&!this.vip&&(this.st.banner===null?ADS_CFG.banner.enabled:!!this.st.banner)},
+  /* ---- 事件層（之後可接 Firebase Analytics 等）---- */
+  emit(name,data){
+    const e=Object.assign({e:name,t:Date.now()},data||{});
+    this.log.push(e);if(this.log.length>60)this.log.shift();
+    this.lis.forEach(f=>{try{f(e)}catch(x){}});
+    try{window.dispatchEvent(new CustomEvent('rummi-ads',{detail:e}))}catch(x){}
+  },
+  on(f){this.lis.push(f)},
+  /* ---- 規則層 ---- */
+  onGameEnd(){const c=ADS_CFG.interstitial,s=this.st;s.games++;if(s.games>c.skipFirst)s.sinceAd++;this.save()},
+  interstitialDue(){
+    if(!this.enabled||this.vip)return false;
+    const c=ADS_CFG.interstitial,s=this.st;
+    return s.sinceAd>=c.everyN&&Date.now()-s.lastAd>=c.minGapSec*1000;
+  },
+  /* 回傳 true=有顯示；false=沒廣告（呼叫端直接往下走，不用等） */
+  async showInterstitial(force){
+    if(!force&&!this.interstitialDue())return false;
+    this.emit('ad_request',{kind:'interstitial'});
+    const ok=await adWithTimeout(this.adapter.load('interstitial'),ADS_CFG.timeoutMs,false);
+    if(!ok){this.st.fail++;this.save();this.emit('ad_failed',{kind:'interstitial'});return false}
+    this.emit('ad_loaded',{kind:'interstitial'});
+    this.st.sinceAd=0;this.st.lastAd=Date.now();this.st.imp.interstitial++;this.save();
+    this.emit('ad_impression',{kind:'interstitial'});
+    try{await this.adapter.show('interstitial')}catch(e){}
+    this.emit('ad_closed',{kind:'interstitial'});
+    return true;
+  },
+  rewardLeft(){return Math.max(0,ADS_CFG.rewarded.dailyCap-(this.st.day===adDay()?this.st.rwToday:0))},
+  bankFull(){return this.st.bank>=ADS_CFG.rewarded.bankMax},
+  /* 玩家主動看獎勵廣告：回傳 'ok' | 'fail' | 'cap' | 'full' | 'skipped'（中途關掉不給獎勵） */
+  async showRewarded(){
+    if(!this.enabled)return 'fail';
+    if(this.rewardLeft()<=0)return 'cap';
+    if(this.bankFull())return 'full';
+    this.emit('ad_request',{kind:'rewarded'});
+    const ok=await adWithTimeout(this.adapter.load('rewarded'),ADS_CFG.timeoutMs,false);
+    if(!ok){this.st.fail++;this.save();this.emit('ad_failed',{kind:'rewarded'});return 'fail'}
+    this.emit('ad_loaded',{kind:'rewarded'});
+    this.st.imp.rewarded++;this.save();this.emit('ad_impression',{kind:'rewarded'});
+    let earned=false;
+    try{earned=!!(await this.adapter.show('rewarded'))}catch(e){}
+    this.emit('ad_closed',{kind:'rewarded',earned});
+    if(!earned)return 'skipped';
+    /* 之後接上 AdMob 伺服器端驗證（SSV）時，改成：驗證通過才發放 */
+    this.st.done.rewarded++;this.st.rwToday++;this.st.bank=Math.min(ADS_CFG.rewarded.bankMax,this.st.bank+1);this.save();
+    this.emit('reward_earned',{kind:'rewarded',reward:'hint'});
+    return 'ok';
+  },
+  /* 開局時領走存起來的提示（只限單人對電腦，由呼叫端判斷） */
+  takeHints(){const n=this.st.bank|0;if(n>0){this.st.bank=0;this.save()}return n},
+  bannerSeen(){this.st.imp.banner++;this.save();this.emit('banner_impression',{kind:'banner'})},
+  resetCounters(){const k=this.st;k.games=0;k.sinceAd=0;k.lastAd=0;k.imp={interstitial:0,rewarded:0,banner:0};k.done={rewarded:0};k.fail=0;k.rwToday=0;k.bank=0;this.log.length=0;this.save()}
+};
+
+/* ---- 轉接層：測試模擬（網頁版／開發期）---- */
+const MOCK={
+  name:'mock',
+  async load(kind){await new Promise(r=>setTimeout(r,120));return !Ads.st.failSim},
+  show(kind){
+    return new Promise(res=>{
+      const secs=kind==='rewarded'?5:3;let left=secs,earned=false;
+      const el=document.createElement('div');el.className='adov';el.style.cssText='position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:600 15px system-ui,sans-serif;color:#222';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
+      const R=kind==='rewarded';
+      const paint=()=>{
+        el.innerHTML=`<div class="adbox" style="background:#fff;border-radius:16px;padding:20px;width:min(88vw,320px);text-align:center"><span class="adtag">測試廣告</span>
+          <p class="adline">${R?'這是測試用的獎勵廣告畫面':'這是測試用的插頁廣告畫面'}</p>
+          <p class="adwait">${left>0?(R?`再 ${left} 秒即可領取獎勵`:`${left} 秒後可關閉`):(R?'獎勵已解鎖！':'')}</p>
+          <button data-ad="close" ${left>0&&!R?'disabled':''}>${left>0&&R?'放棄':(R?'領取獎勵':'關閉')}</button></div>`;
+      };
+      const finish=()=>{clearInterval(tm);el.remove();res(kind==='rewarded'?earned:true)};
+      const tm=setInterval(()=>{left--;if(left<=0){left=0;earned=true;clearInterval(tm)}paint()},1000);
+      el.addEventListener('click',e=>{const b=e.target.closest('[data-ad=close]');if(b&&!b.disabled){e.stopPropagation();finish()}});
+      paint();document.body.appendChild(el);
+    });
+  }
+};
+/* ---- 轉接層：AdMob（iOS／Android App）。骨架：等打包成 App 並安裝
+   @capacitor-community/admob 外掛後才能實測；目前網頁版不會走到這裡。---- */
+const ADMOB={
+  name:'admob',
+  ids(){const p=(window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform())==='ios'?'ios':'android';return ADS_TEST_IDS[p]},
+  plug(){return window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdMob},
+  async load(kind){
+    const P=this.plug();if(!P)return false;
+    try{
+      if(!this.inited){await P.initialize({initializeForTesting:true});this.inited=true}
+      if(kind==='interstitial')await P.prepareInterstitial({adId:this.ids().interstitial,isTesting:true});
+      else await P.prepareRewardVideoAd({adId:this.ids().rewarded,isTesting:true});
+      return true;
+    }catch(e){return false}
+  },
+  async show(kind){
+    const P=this.plug();if(!P)return false;
+    if(kind==='interstitial'){await P.showInterstitial();return true}
+    const r=await P.showRewardVideoAd();return !!(r&&(r.amount>0||r.type));
+  }
+};
+Ads.load();
+
 /* ====== 儲存層 ======
    mem：單人（記憶體）／ host：房主持有資料，朋友透過 PeerJS 對房主讀寫 ／ storage：Claude 共享儲存（備援） */
 const mem=new Map();let remoteOK=false;
@@ -1167,23 +1324,42 @@ const Store={
   mode:'mem',rpc:null,
   async get(k){try{
     if(this.rpc)return await this.rpc('get',k);
+    if(this.blocked())return null;
     if(this.mode==='storage'){const r=await window.storage.get(k,true);return r&&r.value!=null?JSON.parse(r.value):null}
     return mem.has(k)?JSON.parse(mem.get(k)):null}catch(e){return null}},
+  blocked(){return this.mode==='mem'&&typeof S!=='undefined'&&S.online&&!S.host},
   async set(k,v){try{
     if(this.rpc)return !!await this.rpc('set',k,v);
+    if(this.blocked())return false;
     if(this.mode==='storage'){const r=await window.storage.set(k,JSON.stringify(v),true);return !!r}
-    mem.set(k,JSON.stringify(v));return true}catch(e){console.warn('store set',e);return false}},
+    mem.set(k,JSON.stringify(v));snapSoon();return true}catch(e){console.warn('store set',e);return false}},
   async del(k){try{
     if(this.rpc){await this.rpc('del',k);return}
-    if(this.mode==='storage')await window.storage.delete(k,true);else mem.delete(k)}catch(e){}},
+    if(this.blocked())return;
+    if(this.mode==='storage')await window.storage.delete(k,true);else{mem.delete(k);snapSoon()}}catch(e){}},
   async list(p){try{
     if(this.rpc)return (await this.rpc('list',p))||[];
+    if(this.blocked())return [];
     if(this.mode==='storage'){const r=await window.storage.list(p,true);return(r&&r.keys)||[]}
     return[...mem.keys()].filter(k=>k.startsWith(p))}catch(e){return[]}}
 };
 
 /* ====== PeerJS 連線：房主＝伺服器 ====== */
-const NET={peer:null,conns:new Set(),hostConn:null,pw:''};
+const NET={peer:null,conns:new Set(),hostConn:null,pw:'',myPw:'',snap:null};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* 房主定時把整個房間備份給所有朋友；房主消失時，朋友之一用備份接任房主 */
+function snapObj(){const o={},pre=`rummi:${S.code}:`;for(const [k,v] of mem)if(k.startsWith(pre))o[k]=v;return o}
+let snapT=null;
+function snapSoon(){
+  if(typeof S==='undefined'||!S.host||!S.code||!NET.conns.size||snapT)return;
+  snapT=setTimeout(()=>{snapT=null;flushSnap()},120);
+}
+function flushSnap(c){
+  if(typeof S==='undefined'||!S.host||!S.code)return;
+  const o=snapObj();
+  const list=c?[c]:[...NET.conns].filter(x=>x.auth);
+  list.forEach(x=>{try{x.send({snap:o})}catch(e){}});
+}
 const peerOK=()=>typeof window.Peer==='function';
 const PID=code=>'rummi-'+code.toLowerCase();
 function netClose(){
@@ -1197,7 +1373,7 @@ function serveReq(c,m){
   if(!m||typeof m!=='object')return;
   if(m.op==='hello'){
     const ok=!NET.pw||String(m.pw||'')===NET.pw;
-    if(ok){c.auth=true;c.pid=String(m.id||'');try{c.send({hello:'ok'})}catch(e){}}
+    if(ok){c.auth=true;c.pid=String(m.id||'');try{c.send({hello:'ok'})}catch(e){}flushSnap(c);goBack(c.pid)}
     else{try{c.send({hello:'pw'})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},300)}
     return;
   }
@@ -1205,8 +1381,9 @@ function serveReq(c,m){
   let r=null;
   try{
     if(m.op==='get')r=mem.has(m.k)?JSON.parse(mem.get(m.k)):null;
-    else if(m.op==='set'){mem.set(m.k,JSON.stringify(m.v));r=true}
-    else if(m.op==='del'){mem.delete(m.k);r=true}
+    else if(m.op==='set'){mem.set(m.k,JSON.stringify(m.v));snapSoon();r=true}
+    else if(m.op==='del'){mem.delete(m.k);snapSoon();r=true}
+    else if(m.op==='back'){goBack(c.pid);r=true}
     else if(m.op==='list')r=[...mem.keys()].filter(k=>k.startsWith(m.k));
     else if(m.op==='leave'){handleLeave(c.pid);r=true}
   }catch(e){r=null}
@@ -1217,8 +1394,9 @@ function hostPeer(code){
     let done=false;const p=new Peer(PID(code),{debug:0});
     const fail=e=>{if(done)return;done=true;try{p.destroy()}catch(x){}reject(e)};
     const to=setTimeout(()=>fail({type:'timeout'}),9000);
-    p.on('open',()=>{if(done)return;done=true;clearTimeout(to);NET.peer=p;resolve()});
-    p.on('error',e=>{clearTimeout(to);fail(e)});
+    let opened=false;
+    p.on('open',()=>{if(done)return;done=true;opened=true;clearTimeout(to);NET.peer=p;resolve()});
+    p.on('error',e=>{clearTimeout(to);if(opened){if(e&&e.type==='unavailable-id')demoteHost();return}fail(e)});
     p.on('connection',c=>{
       NET.conns.add(c);
       c.on('data',m=>serveReq(c,m));
@@ -1242,7 +1420,7 @@ function joinPeer(code,pw){
         if(m&&m.hello){
           if(done)return;
           if(m.hello==='ok'){
-            done=true;clearTimeout(to);NET.peer=p;NET.hostConn=c;
+            done=true;clearTimeout(to);NET.peer=p;NET.hostConn=c;NET.myPw=pw||'';
             Store.rpc=(op,k,v)=>new Promise(res=>{
               if(!c.open){res(null);return}
               const i=++seq;pend.set(i,res);
@@ -1253,16 +1431,78 @@ function joinPeer(code,pw){
           }else fail({type:'badpw'});
           return;
         }
+        if(m&&m.snap){NET.snap=m.snap;return}
         if(m&&pend.has(m.i)){pend.get(m.i)(m.r);pend.delete(m.i)}
       });
       c.on('close',()=>{pend.forEach(f=>f(null));pend.clear();if(NET.hostConn===c){NET.hostConn=null;onHostGone()}});
     });
   });
 }
-function onHostGone(){
-  if(!S.code)return;
-  toast(tr('hostLeft'));resetHome();
+let migrating=false;
+const hideToast=()=>{const t=$('#toast');if(t)t.classList.remove('show')};
+function loadSnap(snap){mem.clear();for(const k in snap)mem.set(k,snap[k])}
+/* 與房主的連線中斷：對局中就嘗試「接任房主」或「重新加入新房主」，不行才回首頁 */
+async function onHostGone(){
+  if(!S.code||migrating)return;
+  const code=S.code,pw=NET.myPw||'',snap=NET.snap,st=S.st;
+  const can=S.online&&st&&st.phase==='play'&&snap&&snap[`rummi:${code}:s`];
+  if(!can){toast(tr('hostLeft'));resetHome();return}
+  migrating=true;stopPoll();netClose();
+  toast(tr('reconnecting'),60000);
+  try{
+    for(let i=0;i<14&&S.code===code;i++){
+      loadSnap(snap);
+      let claimed=false;
+      try{await hostPeer(code);claimed=true}catch(e){}
+      if(claimed){await becomeHost(code,pw);hideToast();return}
+      try{const r=await rejoinGuest(code,pw);if(r)return}catch(e){}
+      await sleep(1200+Math.random()*900);
+    }
+    if(S.code===code){toast(tr('hostLeft'));resetHome()}
+  }finally{migrating=false}
 }
+async function becomeHost(code,pw){
+  NET.pw=pw;S.host=true;S.online=true;Store.mode='mem';Store.rpc=null;
+  const raw=mem.get(K('s'));const st=raw?JSON.parse(raw):null;
+  if(!st||st.phase!=='play'){toast(tr('hostLeft'));resetHome();return}
+  const old=st.host,op=st.players.find(p=>p.id===old);
+  st.host=S.me.id;
+  if(op&&old!==S.me.id){op.auto=true;st.msg={k:'hostmv',name:pname(op)}}
+  st.v=Math.max(st.v,S.st?S.st.v:0)+5;
+  mem.set(K('s'),JSON.stringify(st));
+  S.st=null;S.turnSeq=-1;startPoll();
+  await onState(st);hostDuties();
+  /* 給朋友一點時間連回來；還沒回來的先由電腦代打 */
+  setTimeout(()=>{
+    if(!S.host||!S.st||S.st.phase!=='play')return;
+    const here=new Set([...NET.conns].filter(c=>c.auth).map(c=>c.pid));
+    S.st.players.forEach(p=>{if(!p.bot&&!p.auto&&p.id!==S.me.id&&!here.has(p.id))goAway(p.id)});
+  },25000);
+}
+async function rejoinGuest(code,pw){
+  netClose();
+  await joinPeer(code,pw);
+  NET.myPw=pw||'';Store.mode='mem';S.host=false;
+  const st=await Store.get(K('s'));
+  if(!st){netClose();throw {type:'nostate'}}
+  if(st.phase==='closed'||!st.players.some(p=>p.id===S.me.id)){toast(tr('hostLeft'));resetHome();return 'gone'}
+  S.st=null;S.turnSeq=-1;startPoll();hideToast();await onState(st);return true;
+}
+/* 舊房主回來了，但房主位置已被別人接任：改當一般玩家加入 */
+async function demoteHost(){
+  if(!S.host||!S.code||migrating)return;
+  migrating=true;const code=S.code,pw=NET.pw;
+  stopPoll();S.host=false;netClose();toast(tr('reconnecting'),60000);
+  try{
+    for(let i=0;i<8;i++){try{if(await rejoinGuest(code,pw))return}catch(e){await sleep(1500)}}
+    toast(tr('hostLeft'));resetHome();
+  }finally{migrating=false}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||typeof S==='undefined'||!S.code||migrating)return;
+  if(S.host&&NET.peer&&NET.peer.disconnected&&!NET.peer.destroyed){try{NET.peer.reconnect()}catch(e){}}
+  else if(S.online&&!S.host&&S.st&&S.st.phase==='play'&&NET.hostConn&&!NET.hostConn.open)onHostGone();
+});
 
 /* ====== 狀態 ====== */
 function detectLang(){const l=String((navigator.languages&&navigator.languages[0])||navigator.language||'zh').toLowerCase();return l.startsWith('ko')?'ko':l.startsWith('en')?'en':'zh'}
@@ -1302,7 +1542,14 @@ function savePrefs(){
   try{localStorage.setItem('rummi:profile',data)}catch(e){}
   try{if(window.storage){const r=window.storage.set('rummi:profile',data,false);if(r&&r.catch)r.catch(()=>{})}}catch(e){}
 }
+function loadSid(){
+  try{const v=sessionStorage.getItem('rummi:sid');if(v&&/^[a-z0-9]{4,20}$/i.test(v))S.me.id=v;else sessionStorage.setItem('rummi:sid',S.me.id)}catch(e){}
+  try{const r=JSON.parse(sessionStorage.getItem('rummi:last')||'null');if(r&&r.code&&Date.now()-r.t<2400000)S.lastRoom=r}catch(e){}
+}
+function saveLast(){try{sessionStorage.setItem('rummi:last',JSON.stringify({code:S.code,pw:S.host?NET.pw:(NET.myPw||''),t:Date.now()}));S.lastRoom={code:S.code,pw:S.host?NET.pw:(NET.myPw||''),t:Date.now()}}catch(e){}}
+function clearLast(){S.lastRoom=null;try{sessionStorage.removeItem('rummi:last')}catch(e){}}
 async function loadProfile(){
+  loadSid();
   let raw=null;
   try{if(window.storage){const r=await window.storage.get('rummi:profile',false);if(r&&r.value)raw=r.value}}catch(e){}
   if(!raw){try{raw=localStorage.getItem('rummi:profile')}catch(e){}}
@@ -1392,6 +1639,7 @@ function rWelcome(){
     <div class="cta">
       <button class="btn xl" data-act="quick"><span class="bt">${IC('turn')}${tr('quick')}</span><small>${tr('quickSub')}</small></button>
       <button class="btn lg sec" data-act="custom">${tr('custom')}</button>
+      ${S.lastRoom?`<div class="subl"><button class="link pulse" data-act="rejoin">${tr('rejoin',S.lastRoom.code)}</button></div>`:''}
       <div class="subl"><button class="link ${nw?'pulse':''}" data-act="learn" data-v="welcome">${tr('learnLink')}</button><i>·</i><button class="link" data-act="go" data-v="join">${tr('joinLink')}</button></div>
       <div class="themes" role="group" aria-label="${esc(tr('setStyle'))}">${THEME_ORDER.map(k=>`<button type="button" class="sw sw-${k} ${S.pref.theme===k?'on':''}" data-act="settheme" data-v="${k}" aria-label="${esc(themeName(k))}" aria-pressed="${S.pref.theme===k}"><i></i><span>${esc(themeName(k))}</span></button>`).join('')}</div>
     </div>
@@ -1612,7 +1860,7 @@ function rGame(){
   const played=playedCount();
   const ti=turnInfo();
   const selOnTableMine=[...S.sel].some(id=>S.startRackSet.has(id)&&!S.rack.includes(id));
-  const plHTML=st.players.map((p,i)=>`<div class="pl ${i===st.turn&&!over?'turn':''}">${S.bubble&&S.bubble.id===p.id?`<span class="bub">${S.bubble.e}</span>`:''}${avH(p.av)}<span class="pn">${esc(pname(p))}${p.id===S.me.id?`<i class="meTag">${tr('meTag')}</i>`:''}</span><span class="cnt ${p.meld?'ok':''}">${tr('cnt',p.n)}${p.meld?' ✓':''}</span></div>`).join('');
+  const plHTML=st.players.map((p,i)=>`<div class="pl ${i===st.turn&&!over?'turn':''}">${S.bubble&&S.bubble.id===p.id?`<span class="bub">${S.bubble.e}</span>`:''}${avH(p.av)}<span class="pn">${esc(pname(p))}${p.id===S.me.id?`<i class="meTag">${tr('meTag')}</i>`:''}${p.auto?`<i class="meTag">${tr('autoTag')}</i>`:''}</span><span class="cnt ${p.meld?'ok':''}">${tr('cnt',p.n)}${p.meld?' ✓':''}</span></div>`).join('');
   const table=S.table.map((s,i)=>{
     const a=analyze(s);
     return `<div class="plate ${a.ok?'':'bad'}"><span class="kind">${a.ok?(a.type==='run'?tr('kRun'):tr('kGroup')):tr('kBad')}</span><div class="ts">${s.map(id=>tileH(id,true)).join('')}</div>${my?`<button class="plus" data-act="addto" data-v="${i}" aria-label="${esc(tr('addToSet'))}">＋</button>`:''}</div>`;
@@ -1719,6 +1967,9 @@ function fmtMsg(m){
     case'pass':return tr('mPass',who);
     case'win':return tr('mWin',who);
     case'left':return tr('mLeft',m.name||who);
+    case'away':return tr('mAway',m.name||who);
+    case'back':return tr('mBack',m.name||who);
+    case'hostmv':return tr('mHostMv',m.name||who);
   }
   return '';
 }
@@ -1751,7 +2002,7 @@ async function createRoom(online,cfg){
   const st={v:1,phase:'lobby',code,host:S.me.id,players,settings:{timer:cfg.timer,meld30:cfg.meld30,diff:cfg.diff,hints:cfg.hints,cap:1+cfg.bots+cfg.humans},seq:0,msg:null,table:[],pool:[],board:{}};
   for(let i=0;i<cfg.bots;i++)addBotTo(st);
   if(!await Store.set(K('s'),st)){toast(tr('createFail'));return}
-  S.st=st;S.turnSeq=-1;S.rxSeen=undefined;startPoll();
+  S.st=st;S.turnSeq=-1;S.rxSeen=undefined;if(online)saveLast();startPoll();
   if(!online){await startGame();return}
   S.screen='lobby';render();
 }
@@ -1783,12 +2034,13 @@ async function joinRoom(){
     try{await joinPeer(code,S.joinPw);Store.mode='mem'}
     catch(e){
       S.code='';
+      if(e&&e.type==='peer-unavailable')clearLast();
       if(e&&e.type==='badpw'){const had=!!S.joinPw;S.needPw=true;toast(had?tr('wrongPw'):tr('needPw'),3500);render();const i=$('#jpw');if(i)i.focus();return}
       toast(e&&e.type==='peer-unavailable'?tr('notFound'):tr('netFail'),4500);return;
     }
   }else Store.mode='storage';
   const st=await Store.get(K('s'));
-  if(!st||st.phase==='closed'){toast(tr('notFound'));S.code='';netClose();return}
+  if(!st||st.phase==='closed'){clearLast();toast(tr('notFound'));S.code='';netClose();return}
   S.host=st.host===S.me.id;
   const inside=st.players.some(p=>p.id===S.me.id);
   if(!inside){
@@ -1796,14 +2048,18 @@ async function joinRoom(){
     if(st.players.length>=((st.settings&&st.settings.cap)||4)){toast(tr('roomFull'));S.code='';netClose();return}
     await Store.set(K('j:'+S.me.id),{name:S.me.name,av:S.me.av,t:Date.now()});
   }
-  S.st=null;S.turnSeq=-1;S.rxSeen=undefined;S.needPw=false;startPoll();
+  S.st=null;S.turnSeq=-1;S.rxSeen=undefined;S.needPw=false;saveLast();startPoll();
   await onState(st);
 }
 async function leaveRoom(){
-  stopPoll();
+  clearLast();stopPoll();
   try{
     if(S.code&&S.st){
-      if(S.host)await Store.set(K('s'),Object.assign({},S.st,{phase:'closed',v:S.st.v+1}));
+      if(S.host){
+        const others=S.st.phase==='play'&&[...NET.conns].some(c=>c.auth&&c.pid&&c.pid!==S.me.id&&S.st.players.some(p=>p.id===c.pid&&!p.bot&&!p.auto));
+        if(others)flushSnap();
+        else await Store.set(K('s'),Object.assign({},S.st,{phase:'closed',v:S.st.v+1}));
+      }
       else{
         if(Store.rpc&&S.st.phase==='play')await Store.rpc('leave');
         await Store.del(K('j:'+S.me.id));
@@ -1868,6 +2124,7 @@ async function poll(){
   if(polling||!S.code)return;polling=true;
   try{
     const cur=await Store.get(K('s'));
+    if(cur===null&&!S.host&&Store.rpc&&S.st&&S.st.phase==='play'){if(++S.nullN>=4){S.nullN=0;polling=false;onHostGone();return}}else S.nullN=0;
     if(cur&&(!S.st||cur.v>S.st.v))await onState(cur);
     if(S.screen==='game'){
       const rx=await Store.get(K('rx'));
@@ -1881,6 +2138,8 @@ async function onState(cur){
   const prev=S.st;
   if(cur.phase==='closed'){toast(tr('hostLeft'));resetHome();return}
   S.st=cur;
+  {const me=cur.players.find(p=>p.id===S.me.id);
+   if(me&&me.auto&&!S.host&&Store.rpc&&!S.backSent){S.backSent=true;Store.rpc('back').then(()=>{S.backSent=false})}}
   if(cur.phase==='lobby'){S.screen='lobby';S.turnSeq=-1;render();return}
   if(!cur.players.some(p=>p.id===S.me.id)){toast(tr('notInList'));resetHome();return}
   const first=S.screen!=='game'||!prev||prev.phase==='lobby';
@@ -1915,16 +2174,16 @@ async function afterWrite(){
 function hostDuties(){
   const st=S.st;if(!st||st.phase!=='play'||!S.host)return;
   const p=st.players[st.turn];
-  if(p.bot&&!S.botBusy){
+  if((p.bot||p.auto)&&!S.botBusy){
     S.botBusy=true;const seq=st.seq;
     setTimeout(async()=>{try{await botTurn(seq)}finally{S.botBusy=false}},1000+Math.random()*900);
-  }else if(!p.bot&&p.id!==S.me.id&&st.settings.timer&&S.deadline&&Date.now()>S.deadline+7000&&S.forcedSeq!==st.seq){
+  }else if(!p.bot&&!p.auto&&p.id!==S.me.id&&st.settings.timer&&S.deadline&&Date.now()>S.deadline+7000&&S.forcedSeq!==st.seq){
     S.forcedSeq=st.seq;forceSkip();
   }
 }
 async function botTurn(seq){
   const st=S.st;if(!st||st.seq!==seq||st.phase!=='play')return;
-  const p=st.players[st.turn];if(!p.bot)return;
+  const p=st.players[st.turn];if(!p.bot&&!p.auto)return;
   const rack=await getRack(p.id);
   const plan=planBot(st.table,rack,p.meld,st.settings.meld30,st.settings.diff||'normal');
   const ok=await finishTurn(p.id,plan.table,plan.played>0?plan.rack:rack,plan.played);
@@ -1973,8 +2232,23 @@ async function finishTurn(pid,table,rack,played){
 /* 玩家離開：牌放回牌堆、輪次順延；只剩一人就直接結束 */
 function handleLeave(pid){
   if(!S.host||!pid||!S.st)return;
-  if(S.st.phase==='play')removeFromGame(pid);
+  if(S.st.phase==='play')goAway(pid);
   else Store.del(K('j:'+pid));
+}
+/* 斷線或離開：座位交給電腦代打，人回來就接回（牌都還在） */
+let awaying=Promise.resolve();
+function goAway(pid){awaying=awaying.then(()=>setAuto(pid,true)).catch(()=>{});return awaying}
+function goBack(pid){awaying=awaying.then(()=>setAuto(pid,false)).catch(()=>{});return awaying}
+async function setAuto(pid,on){
+  if(!S.host||!pid||pid===S.me.id)return;
+  const cur=await Store.get(K('s'));
+  if(!cur||cur.phase!=='play')return;
+  const p=cur.players.find(x=>x.id===pid);if(!p||p.bot)return;
+  if(on===!!p.auto)return;
+  if(on)p.auto=true;else delete p.auto;
+  cur.msg={k:on?'away':'back',name:pname(p)};cur.v++;
+  if(!await Store.set(K('s'),cur))return;
+  S.st=cur;await afterWrite();
 }
 let removing=Promise.resolve();
 function removeFromGame(pid){removing=removing.then(()=>doRemove(pid)).catch(()=>{});return removing}
@@ -2219,7 +2493,7 @@ function rulesH(){
 function menuH(){
   const st=S.st;
   const cur=st&&st.phase==='play'?st.players[st.turn]:null;
-  const other=cur&&!isMyTurn()&&!cur.bot;
+  const other=cur&&!isMyTurn()&&!cur.bot&&!cur.auto;
   return `<div class="modal" data-act="closem"><div class="sheet">
     <h3>${tr('menuTitle')}</h3>
     ${settingsH()}
@@ -2317,6 +2591,7 @@ document.addEventListener('click',e=>{
     case'gosettings':S.prev=S.screen;S.screen='settings';render();break;
     case'backs':S.screen=S.prev||'welcome';render();break;
     case'create':ensureRemote().then(ok=>ok?createRoom(true):noRemote());break;
+    case'rejoin':if(S.lastRoom){S.joinCode=S.lastRoom.code;S.joinPw=S.lastRoom.pw||'';ensureRemote().then(ok=>ok?joinRoom():noRemote())}break;
     case'join':ensureRemote().then(ok=>ok?joinRoom():noRemote());break;
     case'rules':openModal('rules');break;
     case'closem':{const n=$('#pname');if(n&&S.modal==='profile'){S.me.name=n.value.trim().slice(0,8);savePrefs()}openModal(null);render();break}
@@ -2332,7 +2607,7 @@ document.addEventListener('click',e=>{
     case'again':playAgain();break;
     case'leave':openModal(null);leaveRoom();break;
     case'skip':openModal(null);forceSkip();break;
-    case'kick':{openModal(null);if(S.st&&S.st.phase==='play'){const p=S.st.players[S.st.turn];if(p&&!p.bot&&p.id!==S.me.id)removeFromGame(p.id)}break}
+    case'kick':{openModal(null);if(S.st&&S.st.phase==='play'){const p=S.st.players[S.st.turn];if(p&&!p.bot&&!p.auto&&p.id!==S.me.id)removeFromGame(p.id)}break}
     case'react':S.rxOpen=!S.rxOpen;render();break;
     case'rx':sendReact(v);break;
     case'sort':S.sortMode=S.sortMode==='color'?'num':'color';sortRack(S.rack,S.sortMode);render();break;
