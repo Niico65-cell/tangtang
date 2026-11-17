@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+:root{--sat:env(safe-area-inset-top)}
+html.embedded{--sat:0px}
 /* =====================================================================
    拉密 Rummi — 主題變數系統
    所有元件只讀取下面的 token；兩種風格只是兩組 token + 少量結構差異
@@ -139,7 +141,7 @@ html[data-theme="ins"] .cloth .tile.mine::after{width:5px;height:5px}
 .dragsrc{opacity:.3}
 
 /* ---------- 共用 ---------- */
-.wrap{max-width:470px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:calc(12px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom))}
+.wrap{max-width:470px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:calc(12px + var(--sat)) 18px calc(14px + env(safe-area-inset-bottom))}
 .card{background:var(--surface);border-radius:var(--r-card);padding:14px;margin:8px 0;box-shadow:var(--card-shadow)}
 .lab{display:block;font-size:13px;font-weight:800;margin:0 0 6px;color:var(--ink2)}
 input{font:inherit;width:100%;padding:12px 15px;border-radius:var(--r-ctl);border:0;background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);font-weight:700}
@@ -245,7 +247,7 @@ html[data-theme="ins"] .slot{box-shadow:inset 0 0 0 1px var(--line-strong)}
 
 /* ---------- 遊戲 ---------- */
 .game{height:100dvh;display:flex;flex-direction:column;max-width:900px;margin:0 auto}
-.top{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 12px 5px}
+.top{display:flex;gap:8px;align-items:center;padding:calc(8px + var(--sat)) 12px 5px}
 .pls{display:flex;gap:6px;flex:1;min-width:0}
 .pl{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 4px 5px;border-radius:var(--r-ctl);background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 2px transparent;transition:background .2s}
 .pl .avt{--s:30px}
@@ -317,7 +319,7 @@ html[data-theme="ins"] .rxrow button{border-radius:12px}
 .pool{font-size:13px;font-weight:800;color:var(--ink2);text-align:center;line-height:1.3;flex:none;min-width:48px}
 .pool b{display:block;font-size:18px;color:var(--ink);font-family:var(--font-num)}
 .endrow .btn{flex:1}
-#toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top));transform:translate(-50%,-14px);background:var(--surface);color:var(--ink);font-weight:800;font-size:14px;padding:10px 18px;border-radius:var(--r-btn);box-shadow:0 8px 24px rgba(80,50,90,.28);opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
+#toast{position:fixed;left:50%;top:calc(76px + var(--sat));transform:translate(-50%,-14px);background:var(--surface);color:var(--ink);font-weight:800;font-size:14px;padding:10px 18px;border-radius:var(--r-btn);box-shadow:0 8px 24px rgba(80,50,90,.28);opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 html[data-theme="ins"] #toast{background:var(--accent);color:var(--accent-ink);border-radius:12px;font-weight:600}
 .modal{position:fixed;inset:0;background:var(--modal-bg);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:40}
@@ -551,6 +553,18 @@ html[data-theme="ins"] .mepill{border-radius:12px}
 .nm .nmav .avt{--s:84px}
 .nm input{text-align:center;font-size:20px;font-weight:800}
 .meTag{font-style:normal;color:var(--accent-d);font-weight:900}
+
+/* 即時看對手排牌 */
+.cloth.live{outline:3px dashed var(--accent);outline-offset:-7px}
+.livebadge{position:absolute;left:10px;top:8px;z-index:6;display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.18);pointer-events:none}
+.livebadge i{width:8px;height:8px;border-radius:50%;background:currentColor;animation:lvdot 1s ease-in-out infinite}
+@keyframes lvdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.tile.lvnew{animation:lvpop .9s ease-out 1;box-shadow:0 0 0 3px var(--accent),0 8px 14px rgba(0,0,0,.2)}
+@keyframes lvpop{0%{transform:scale(1.28)}60%{transform:scale(.96)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.tile.lvnew,.livebadge i{animation:none}}
+
+/* 上一位玩家剛放上桌的牌 */
+.tile.mvnew{box-shadow:0 0 0 3px var(--accent),0 6px 12px rgba(0,0,0,.18)}
 
 </style>
 </head>
@@ -982,6 +996,7 @@ zh:{
   mStart:'遊戲開始！',mPlay:(w,n)=>`${w} 出了 ${n} 張牌`,mDraw:w=>`${w} 抽了一張牌`,mPass:w=>`${w} 沒牌可抽，跳過`,mWin:w=>`${w} 贏啦！`,mLeft:w=>`${w} 離開了，牌已放回牌堆`,
   mAway:w=>`${w} 斷線了，由電腦代打`,mBack:w=>`${w} 回來了`,mHostMv:w=>`原房主 ${w} 斷線，已換人當房主，由電腦代打`,reconnecting:'連線中斷，正在重新連線…',autoTag:'代打',
   rejoin:c=>`回到剛剛的牌局（房號 ${c}）`,
+  liveNow:w=>`${w} 正在排牌…`,
   menuTitle:'選單',skipOther:'讓目前的玩家抽牌跳過',kick:'請目前的玩家離開',leaveGame:'離開遊戲',keepPlaying:'繼續玩',
   rulesTitle:'玩法說明',gotIt:'知道了',jokerTag:'萬用',
   rvGoal:'每人 14 張牌，輪流出牌或抽牌，先把手牌出完的人獲勝。',
@@ -1061,6 +1076,7 @@ en:{
   mStart:'Game on!',mPlay:(w,n)=>`${w} played ${n} tiles`,mDraw:w=>`${w} drew a tile`,mPass:w=>`${w} had nothing to draw — skipped`,mWin:w=>`${w} wins!`,mLeft:w=>`${w} left — tiles returned to the pool`,
   mAway:w=>`${w} disconnected — the computer plays for them`,mBack:w=>`${w} is back`,mHostMv:w=>`Host ${w} dropped — a new host took over and the computer plays for them`,reconnecting:'Connection lost — reconnecting…',autoTag:'Auto',
   rejoin:c=>`Back to your game (room ${c})`,
+  liveNow:w=>`${w} is arranging…`,
   menuTitle:'Menu',skipOther:'Draw & skip for the current player',kick:'Remove the current player',leaveGame:'Leave game',keepPlaying:'Keep playing',
   rulesTitle:'How to play',gotIt:'Got it',jokerTag:'WILD',
   rvGoal:'Everyone gets 14 tiles. Take turns playing or drawing — the first to empty their rack wins.',
@@ -1140,6 +1156,7 @@ ko:{
   mStart:'게임 시작!',mPlay:(w,n)=>`${w}: 타일 ${n}장을 냈어요`,mDraw:w=>`${w}: 타일을 한 장 뽑았어요`,mPass:w=>`${w}: 뽑을 타일이 없어 넘겼어요`,mWin:w=>`${w} 승리!`,mLeft:w=>`${w} 님이 나갔어요. 타일은 더미로 돌아갔어요`,
   mAway:w=>`${w} 연결이 끊겨 컴퓨터가 대신 플레이해요`,mBack:w=>`${w} 돌아왔어요`,mHostMv:w=>`방장 ${w} 연결 끊김 — 새 방장이 이어받고 컴퓨터가 대신 플레이해요`,reconnecting:'연결이 끊겼어요. 다시 연결 중…',autoTag:'자동',
   rejoin:c=>`방금 하던 게임으로 (방 ${c})`,
+  liveNow:w=>`${w} 님이 타일을 놓는 중…`,
   menuTitle:'메뉴',skipOther:'현재 플레이어 대신 뽑고 넘기기',kick:'현재 플레이어 내보내기',leaveGame:'게임 나가기',keepPlaying:'계속하기',
   rulesTitle:'게임 방법',gotIt:'알겠어요',jokerTag:'조커',
   rvGoal:'각자 타일 14장으로 시작해 차례대로 내거나 뽑아요. 손패를 먼저 비우는 사람이 승리해요.',
@@ -1375,8 +1392,8 @@ const FB={
     this.detach();
     this.code=code;this.active=true;this.cache={};this.present=new Set();this.absent={};
     const base=this.db.ref('rooms/'+code);
-    ['s','rx'].forEach(n=>{
-      const r=base.child(n),cb=snap=>{this.cache[n]=snap.val()};
+    ['s','rx','live'].forEach(n=>{
+      const r=base.child(n),cb=snap=>{this.cache[n]=snap.val();if(n==='live'&&this.onLive)this.onLive()};
       r.on('value',cb);this.offs.push(()=>r.off('value',cb));
     });
     const pr=base.child('pres'),pc=snap=>{this.present=new Set(Object.keys(snap.val()||{}))};
@@ -1395,7 +1412,7 @@ const FB={
   /* ---- 讀寫（對外介面和原本的 Store 一致）---- */
   async get(k){
     const t=this.tail(k);
-    if(t==='s'||t==='rx'){const c=this.cache[t];if(c!==undefined)return c?JSON.parse(c):null}
+    if(t==='s'||t==='rx'||t==='live'){const c=this.cache[t];if(c!==undefined)return c?JSON.parse(c):null}
     try{const s=await this.ref(k).once('value');const v=s.val();return v?JSON.parse(v):null}catch(e){return null}
   },
   async set(k,v){
@@ -1412,7 +1429,7 @@ const FB={
         this.cache.s=str;return true;
       }
       await this.ref(k).set(str);
-      if(t==='rx')this.cache.rx=str;
+      if(t==='rx'||t==='live')this.cache[t]=str;
       return true;
     }catch(e){console.warn('fb set',e);return false}
   },
@@ -1446,6 +1463,8 @@ const FB={
 /* 先在背景把 SDK 檔案抓好（不登入、不連線），玩家按建立／加入房間時就不用等 */
 setTimeout(()=>{try{if(FB.supported())fbLoadSdk().catch(()=>{})}catch(e){}},1500);
 
+/* 被嵌在別的頁面（例如 App 內的預覽）時，外層已處理瀏海，不再重複留白 */
+try{if(window.self!==window.top)document.documentElement.classList.add('embedded')}catch(e){document.documentElement.classList.add('embedded')}
 /* ====== 儲存層 ======
    mem：單人（記憶體）／ host：房主持有資料，朋友透過 PeerJS 對房主讀寫 ／ storage：Claude 共享儲存（備援） */
 const mem=new Map();let remoteOK=false;
@@ -1729,7 +1748,7 @@ const winRate=s=>s.g?Math.round(s.w*100/s.g):0;
 /* ====== 畫面 ====== */
 function tileH(id,mine){
   const t0=T(id),th=TH();
-  const cls='tile '+(t0.j?'jk':'c'+t0.c)+(S.sel.has(id)?' sel':'')+(mine&&S.startRackSet.has(id)?' mine':'')+(S.fresh===id?' fresh':'');
+  const cls='tile '+(t0.j?'jk':'c'+t0.c)+(S.sel.has(id)?' sel':'')+(mine&&S.startRackSet.has(id)?' mine':'')+(S.fresh===id?' fresh':'')+(S.liveNew&&S.liveNew.has(id)?' lvnew':'')+(S.moved&&S.moved.has(id)?' mvnew':'');
   const label=t0.j?tr('jokerTag'):tr(S.pref.theme==='ins'?'suitsIns':'suitsCute')[t0.c]+' '+t0.n;
   const inner=t0.j?`<b>${th.joker}</b><i>${esc(tr('jokerTag'))}</i>`:`<b>${t0.n}</b><i>${th.suits[t0.c]}</i>`;
   return `<button type="button" class="${cls}" data-t="${id}" aria-label="${esc(label)}">${inner}</button>`;
@@ -1995,7 +2014,9 @@ function rGame(){
   const ti=turnInfo();
   const selOnTableMine=[...S.sel].some(id=>S.startRackSet.has(id)&&!S.rack.includes(id));
   const plHTML=st.players.map((p,i)=>`<div class="pl ${i===st.turn&&!over?'turn':''}">${S.bubble&&S.bubble.id===p.id?`<span class="bub">${S.bubble.e}</span>`:''}${avH(p.av)}<span class="pn">${esc(pname(p))}${p.id===S.me.id?`<i class="meTag">${tr('meTag')}</i>`:''}${p.auto?`<i class="meTag">${tr('autoTag')}</i>`:''}</span><span class="cnt ${p.meld?'ok':''}">${tr('cnt',p.n)}${p.meld?' ✓':''}</span></div>`).join('');
-  const table=S.table.map((s,i)=>{
+  const lvOn=!my&&!over&&S.live&&S.online;
+  const VT=lvOn?S.live.table:S.table;
+  const table=VT.map((s,i)=>{
     const a=analyze(s);
     return `<div class="plate ${a.ok?'':'bad'}"><span class="kind">${a.ok?(a.type==='run'?tr('kRun'):tr('kGroup')):tr('kBad')}</span><div class="ts">${s.map(id=>tileH(id,true)).join('')}</div>${my?`<button class="plus" data-act="addto" data-v="${i}" aria-label="${esc(tr('addToSet'))}">＋</button>`:''}</div>`;
   }).join('');
@@ -2004,10 +2025,10 @@ function rGame(){
     <div class="top"><div class="pls">${plHTML}</div><button class="menu" data-act="menu" aria-label="${esc(tr('menuAria'))}">⋯</button></div>
     <div class="stat ${ti.cls}">${ti.html}</div>
     ${tutPanelH()}
-    <div class="clothwrap"><div class="cloth" id="table">
+    <div class="clothwrap">${lvOn?`<div class="livebadge"><i></i>${tr('liveNow',pname(st.players[st.turn]))}</div>`:''}<div class="cloth ${lvOn?'live':''}" id="table">
       ${table||''}
       ${my?`<button class="newset" data-act="newset">${tr('newSet')}</button>`:''}
-      ${!S.table.length?`<div class="empty-tip">${tr('emptyTable')}${my?'<br>'+tr('emptyTip'):''}</div>`:''}
+      ${!VT.length?`<div class="empty-tip">${tr('emptyTable')}${my?'<br>'+tr('emptyTip'):''}</div>`:''}
     </div>
       ${my&&hintMax()!==0?`<button type="button" class="hintfab ${hintMax()>0&&!hintPaid()&&S.hintLeft<=0?'empty':''}" data-act="hint" aria-label="${esc(tr('hint'))}">${S.pref.theme==='cute'?'💡':SVG_BULB}${hintMax()>0?`<b>${S.hintLeft}</b>`:''}</button>`:''}
     </div>
@@ -2064,6 +2085,33 @@ function fitTiles(){
 }
 window.addEventListener('resize',()=>{if(S.screen==='game'&&!DR.act)fitTiles()});
 
+/* ====== 即時看對手排牌（只同步桌面，不含任何人的手牌）====== */
+function liveSend(){
+  if(!S.online||!S.st||S.st.phase!=='play'||S.tutM||!isMyTurn())return;
+  const j=JSON.stringify(S.table);
+  if(j===S.liveSent)return;
+  clearTimeout(S.liveT);
+  const wait=Math.max(150,350-(Date.now()-(S.liveAt||0)));
+  S.liveT=setTimeout(()=>{
+    if(!S.st||S.st.phase!=='play'||!isMyTurn())return;
+    S.liveSent=JSON.stringify(S.table);S.liveAt=Date.now();
+    Store.set(K('live'),{seq:S.st.seq,pid:S.me.id,table:S.table,t:Date.now()});
+  },wait);
+}
+async function liveRead(){
+  const st=S.st;
+  if(!st||st.phase!=='play'||isMyTurn()||!S.online){if(S.live){S.live=null;S.liveNew=null;render()}return}
+  const lv=await Store.get(K('live'));
+  const cur=S.st&&S.st.players[S.st.turn];
+  if(lv&&cur&&lv.seq===S.st.seq&&lv.pid===cur.id&&lv.pid!==S.me.id&&Array.isArray(lv.table)){
+    if(!S.live||S.live.t!==lv.t){
+      const inOfficial=new Set([].concat(...S.st.table));
+      S.live=lv;S.liveNew=new Set([].concat(...lv.table).filter(id=>!inOfficial.has(id)));
+      if(S.screen==='game')render();
+    }
+  }else if(S.live){S.live=null;S.liveNew=null;if(S.screen==='game')render()}
+}
+FB.onLive=()=>{if(S.screen==='game')liveRead()};
 function render(){
   if(DR.act){S.pendingRender=true;return}
   S.pendingRender=false;
@@ -2079,6 +2127,7 @@ function render(){
   if(S.screen==='game'&&S.st)fitTiles();
   tutDecorate();
   tick();
+  liveSend();
 }
 
 function confetti(){
@@ -2304,6 +2353,7 @@ async function poll(){
       const rx=await Store.get(K('rx'));
       if(rx&&rx.n!==S.rxSeen)showReact(rx);
     }
+    if(S.screen==='game'&&S.online)await liveRead();
     if(FB.active)await fbTick();
     if(S.host&&S.st&&S.st.phase==='lobby')await hostLobbySync();
     if(S.host)hostDuties();
@@ -2335,6 +2385,12 @@ async function beginTurn(){
   S.rack=ordered;
   const tm=st.settings.timer;S.deadline=(tm&&st.phase==='play')?Date.now()+tm*1000:0;
   S.table=clone(st.table);S.startTable=clone(st.table);
+  S.live=null;S.liveNew=null;S.liveSent=JSON.stringify(S.table);
+  {/* 上一位玩家（含電腦）新放上桌的牌：加亮框提示 */
+   const ids=new Set([].concat(...st.table));
+   const lastMine=st.msg&&st.msg.id===S.me.id;
+   S.moved=(st.msg&&st.msg.k==='play'&&!lastMine&&S.prevTbl&&S.prevGid===st.gid)?new Set([...ids].filter(id=>!S.prevTbl.has(id))):new Set();
+   S.prevTbl=ids;S.prevGid=st.gid;}
   S.startRackArr=S.rack.slice();S.startRackSet=new Set(S.rack);
   if(isMyTurn()&&st.phase==='play')sfx('turn');
 }
