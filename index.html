@@ -1317,27 +1317,160 @@ const ADMOB={
 };
 Ads.load();
 
+/* =====================================================================
+   Firebase（Realtime Database）連線層
+   - 匿名登入：每位玩家有固定身分（uid），重新整理也不會掉座位
+   - 資料放在雲端：房主離開、重新整理，牌局都還在
+   - presence（在線偵測）：誰在線上由資料庫自己知道；在線者中排序最前的真人是「代打負責人」，
+     負責讓電腦代打、處理逾時（只是執行者，不是資料擁有者）
+   - SDK 載入失敗或登入失敗時，自動退回原本的 PeerJS 連線
+   ===================================================================== */
+const FB_CFG={
+  apiKey:"AIzaSyCoDab_WSiy69ITGz1CdEtpFKsAx2Ylg-M",
+  authDomain:"tangtang-rummi.firebaseapp.com",
+  databaseURL:"https://tangtang-rummi-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"tangtang-rummi",
+  storageBucket:"tangtang-rummi.firebasestorage.app",
+  messagingSenderId:"358245481689",
+  appId:"1:358245481689:web:42be528add3bcf1bdf52c8"
+};
+const FB_VER='10.14.1';
+const FB_SDK=['app','auth','database'].map(n=>`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${n}-compat.js`);
+function fbScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s)})}
+let fbSdkP=null;
+function fbLoadSdk(){
+  if(window.firebase&&firebase.initializeApp)return Promise.resolve();
+  if(!fbSdkP)fbSdkP=(async()=>{for(const u of FB_SDK)await fbScript(u)})().catch(e=>{fbSdkP=null;throw e});
+  return fbSdkP;
+}
+const fbTimeout=(p,ms,d)=>new Promise(res=>{let f=false;const t=setTimeout(()=>{if(!f){f=true;res(d)}},ms);Promise.resolve(p).then(v=>{if(!f){f=true;clearTimeout(t);res(v)}},()=>{if(!f){f=true;clearTimeout(t);res(d)}})});
+async function fbHash(s){
+  try{const b=new TextEncoder().encode('tangtang:'+s);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch(e){let h=5381;for(const c of 'tangtang:'+s)h=((h<<5)+h+c.charCodeAt(0))|0;return 'x'+(h>>>0).toString(16)}
+}
+
+const FB={
+  active:false,uid:null,db:null,code:'',cache:{},offs:[],present:new Set(),absent:{},p:null,
+  supported(){return !!FB_CFG.apiKey},
+  ready(){
+    if(!this.p)this.p=fbTimeout(this._init(),12000,false).then(ok=>{if(!ok)this.p=null;return ok});
+    return this.p;
+  },
+  async _init(){
+    try{
+      await fbLoadSdk();
+      if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
+      const a=firebase.auth();
+      const u=await new Promise(res=>{const un=a.onAuthStateChanged(x=>{un();res(x)})});
+      if(!u)await a.signInAnonymously();
+      this.uid=a.currentUser.uid;this.db=firebase.database();
+      return true;
+    }catch(e){console.warn('firebase init failed',e);return false}
+  },
+  /* ---- 路徑對應：rummi:CODE:r:pid → rooms/CODE/r/pid ---- */
+  tail(k){const pre=`rummi:${this.code}:`;return k.startsWith(pre)?k.slice(pre.length):''},
+  ref(k){return this.db.ref('rooms/'+this.code+'/'+this.tail(k).split(':').join('/'))},
+  /* ---- 進出房間與在線偵測 ---- */
+  enterRoom(code){
+    this.detach();
+    this.code=code;this.active=true;this.cache={};this.present=new Set();this.absent={};
+    const base=this.db.ref('rooms/'+code);
+    ['s','rx'].forEach(n=>{
+      const r=base.child(n),cb=snap=>{this.cache[n]=snap.val()};
+      r.on('value',cb);this.offs.push(()=>r.off('value',cb));
+    });
+    const pr=base.child('pres'),pc=snap=>{this.present=new Set(Object.keys(snap.val()||{}))};
+    pr.on('value',pc);this.offs.push(()=>pr.off('value',pc));
+    const me=base.child('pres/'+this.uid),cr=this.db.ref('.info/connected');
+    const cc=snap=>{if(snap.val()===true){try{me.onDisconnect().remove()}catch(e){}me.set(true).catch(()=>{})}};
+    cr.on('value',cc);this.offs.push(()=>cr.off('value',cc));
+    this.meRef=me;
+  },
+  detach(){
+    this.offs.forEach(f=>{try{f()}catch(e){}});this.offs=[];
+    if(this.meRef){try{this.meRef.onDisconnect().cancel()}catch(e){}try{this.meRef.remove()}catch(e){}this.meRef=null}
+    this.active=false;this.code='';this.cache={};this.present=new Set();this.absent={};
+  },
+  async removeRoom(code){try{await this.db.ref('rooms/'+code).remove()}catch(e){}},
+  /* ---- 讀寫（對外介面和原本的 Store 一致）---- */
+  async get(k){
+    const t=this.tail(k);
+    if(t==='s'||t==='rx'){const c=this.cache[t];if(c!==undefined)return c?JSON.parse(c):null}
+    try{const s=await this.ref(k).once('value');const v=s.val();return v?JSON.parse(v):null}catch(e){return null}
+  },
+  async set(k,v){
+    const t=this.tail(k),str=JSON.stringify(v);
+    try{
+      if(t==='s'){
+        /* 只接受版本號更新的寫入：兩個人同時寫時，慢的那個會被擋下，不會蓋掉別人的出牌 */
+        const nv=v&&typeof v.v==='number'?v.v:0;
+        const r=await this.ref(k).transaction(cur=>{
+          if(cur){try{if(JSON.parse(cur).v>=nv)return}catch(e){}}
+          return str;
+        });
+        if(!r.committed)return false;
+        this.cache.s=str;return true;
+      }
+      await this.ref(k).set(str);
+      if(t==='rx')this.cache.rx=str;
+      return true;
+    }catch(e){console.warn('fb set',e);return false}
+  },
+  async del(k){try{await this.ref(k).remove()}catch(e){}},
+  async list(prefix){
+    try{
+      const pre=`rummi:${this.code}:`,t=prefix.startsWith(pre)?prefix.slice(pre.length):'';
+      const parent=t.replace(/:$/,'').split(':').join('/');
+      const s=await this.db.ref('rooms/'+this.code+'/'+parent).once('value');
+      const o=s.val()||{};return Object.keys(o).map(id=>prefix+id);
+    }catch(e){return []}
+  },
+  /* ---- 房間資訊（加入前就要讀，所以不依賴 this.code）---- */
+  async peek(code){try{const s=await this.db.ref('rooms/'+code+'/s').once('value');const v=s.val();return v?JSON.parse(v):null}catch(e){return null}},
+  async getPw(code){try{const s=await this.db.ref('rooms/'+code+'/pw').once('value');return s.val()||''}catch(e){return ''}},
+  async setPw(code,pw){try{const r=this.db.ref('rooms/'+code+'/pw');if(pw)await r.set(await fbHash(pw));else await r.remove()}catch(e){}},
+  /* ---- 代打負責人：在線的真人中，名單排序最前的那一位 ---- */
+  leader(st){const p=st&&st.players.find(x=>!x.bot&&this.present.has(x.id));return p?p.id:null},
+  /* 回傳「已離線超過 ms 毫秒」的真人玩家 id（不含自己） */
+  goneFor(st,me,ms){
+    const out=[],now=Date.now();
+    st.players.forEach(p=>{
+      if(p.bot||p.id===me)return;
+      if(this.present.has(p.id)){delete this.absent[p.id];return}
+      if(!this.absent[p.id])this.absent[p.id]=now;
+      if(now-this.absent[p.id]>=ms)out.push(p.id);
+    });
+    return out;
+  }
+};
+/* 先在背景把 SDK 檔案抓好（不登入、不連線），玩家按建立／加入房間時就不用等 */
+setTimeout(()=>{try{if(FB.supported())fbLoadSdk().catch(()=>{})}catch(e){}},1500);
+
 /* ====== 儲存層 ======
    mem：單人（記憶體）／ host：房主持有資料，朋友透過 PeerJS 對房主讀寫 ／ storage：Claude 共享儲存（備援） */
 const mem=new Map();let remoteOK=false;
 const Store={
   mode:'mem',rpc:null,
   async get(k){try{
+    if(FB.active)return await FB.get(k);
     if(this.rpc)return await this.rpc('get',k);
     if(this.blocked())return null;
     if(this.mode==='storage'){const r=await window.storage.get(k,true);return r&&r.value!=null?JSON.parse(r.value):null}
     return mem.has(k)?JSON.parse(mem.get(k)):null}catch(e){return null}},
   blocked(){return this.mode==='mem'&&typeof S!=='undefined'&&S.online&&!S.host},
   async set(k,v){try{
+    if(FB.active)return await FB.set(k,v);
     if(this.rpc)return !!await this.rpc('set',k,v);
     if(this.blocked())return false;
     if(this.mode==='storage'){const r=await window.storage.set(k,JSON.stringify(v),true);return !!r}
     mem.set(k,JSON.stringify(v));snapSoon();return true}catch(e){console.warn('store set',e);return false}},
   async del(k){try{
+    if(FB.active){await FB.del(k);return}
     if(this.rpc){await this.rpc('del',k);return}
     if(this.blocked())return;
     if(this.mode==='storage')await window.storage.delete(k,true);else{mem.delete(k);snapSoon()}}catch(e){}},
   async list(p){try{
+    if(FB.active)return await FB.list(p);
     if(this.rpc)return (await this.rpc('list',p))||[];
     if(this.blocked())return [];
     if(this.mode==='storage'){const r=await window.storage.list(p,true);return(r&&r.keys)||[]}
@@ -1363,6 +1496,7 @@ function flushSnap(c){
 const peerOK=()=>typeof window.Peer==='function';
 const PID=code=>'rummi-'+code.toLowerCase();
 function netClose(){
+  try{FB.detach()}catch(e){}
   try{NET.conns.forEach(c=>{try{c.close()}catch(e){}})}catch(e){}
   NET.conns.clear();
   try{if(NET.hostConn)NET.hostConn.close()}catch(e){}
@@ -1578,7 +1712,7 @@ async function loadProfile(){
   }catch(e){}
 }
 async function probe(){try{if(!window.storage)return false;const r=await window.storage.set('rummi:probe',String(Date.now()),true);return !!r}catch(e){return false}}
-async function ensureRemote(){if(!remoteOK)remoteOK=peerOK()||await probe();return remoteOK}
+async function ensureRemote(){if(!remoteOK)remoteOK=peerOK()||FB.supported()||await probe();return remoteOK}
 function noRemote(){toast(tr('noRemote'),5200)}
 
 function recordResult(st){
@@ -1721,12 +1855,12 @@ function rLobby(){
       <p class="h2">${tr('turnTime')}</p>
       <div class="chips">${TIMERS.map(v=>`<button class="chip ${st.settings.timer===v?'on':''} ${ro&&st.settings.timer!==v?'dim':''}" ${ro?'disabled':''} data-act="tset" data-v="${v}">${timerLabel(v)}</button>`).join('')}</div>
       <p class="h2">${tr('firstMeld')}</p>
-      <div class="chips" style="${hasBot||(host&&S.online&&NET.peer)?'':'margin:0'}">
+      <div class="chips" style="${hasBot||(host&&S.online&&(NET.peer||FB.active))?'':'margin:0'}">
         <button class="chip ${st.settings.meld30?'on':''} ${ro&&!st.settings.meld30?'dim':''}" ${ro?'disabled':''} data-act="mset" data-v="1">${tr('meld30')}</button>
         <button class="chip ${!st.settings.meld30?'on':''} ${ro&&st.settings.meld30?'dim':''}" ${ro?'disabled':''} data-act="mset" data-v="0">${tr('meldFree')}</button>
       </div>
-      ${hasBot?`<p class="h2">${tr('diffT')}</p><div class="chips" style="${host&&S.online&&NET.peer?'':'margin:0'}">${DIFFS.map(d=>`<button class="chip ${(st.settings.diff||'normal')===d?'on':''} ${ro&&(st.settings.diff||'normal')!==d?'dim':''}" ${ro?'disabled':''} data-act="dset" data-v="${d}">${tr(d)}</button>`).join('')}</div>`:''}
-      ${host&&S.online&&NET.peer?`<label class="lab" for="hostpw">${tr('pwLab')}</label><input id="hostpw" maxlength="8" placeholder="${esc(tr('pwPh'))}" value="${esc(NET.pw)}" autocomplete="off"><p class="note" style="text-align:left;margin:6px 0 0">${tr('pwNote')}</p>`:''}
+      ${hasBot?`<p class="h2">${tr('diffT')}</p><div class="chips" style="${host&&S.online&&(NET.peer||FB.active)?'':'margin:0'}">${DIFFS.map(d=>`<button class="chip ${(st.settings.diff||'normal')===d?'on':''} ${ro&&(st.settings.diff||'normal')!==d?'dim':''}" ${ro?'disabled':''} data-act="dset" data-v="${d}">${tr(d)}</button>`).join('')}</div>`:''}
+      ${host&&S.online&&(NET.peer||FB.active)?`<label class="lab" for="hostpw">${tr('pwLab')}</label><input id="hostpw" maxlength="8" placeholder="${esc(tr('pwPh'))}" value="${esc(NET.pw)}" autocomplete="off"><p class="note" style="text-align:left;margin:6px 0 0">${tr('pwNote')}</p>`:''}
     </section>`:''}
     ${host?`<button class="btn" data-act="start" ${st.players.length<2?'disabled':''}>${st.players.length<2?tr('need2'):tr('start')+(TH().ic.turn?' '+TH().ic.turn:'')}</button>`
       :`<p class="note">${joined?tr('waitStart'):''}</p>`}
@@ -1984,7 +2118,23 @@ async function createRoom(online,cfg){
   S.online=online;S.host=true;S.code='';NET.pw='';
   netClose();Store.mode='mem';
   let code='';
-  if(online&&peerOK()){
+  let viaFB=false;
+  if(online&&FB.supported()){
+    toast(tr('connecting'),9000);
+    viaFB=await FB.ready();
+    if(viaFB){
+      S.me.id=FB.uid;
+      let ok=false;
+      for(let i=0;i<8&&!ok;i++){
+        code=genCode();const ex=await FB.peek(code);
+        if(!ex||ex.phase==='closed')ok=true;
+      }
+      if(!ok){toast(tr('createFail'));S.host=false;return}
+      S.code=code;FB.enterRoom(code);toast(tr('roomReady'),1800);
+    }
+  }
+  if(viaFB){/* 已連上 Firebase */}
+  else if(online&&peerOK()){
     toast(tr('connecting'),9000);
     let ok=false;
     for(let i=0;i<6&&!ok;i++){
@@ -2029,7 +2179,26 @@ async function joinRoom(){
   const code=(S.joinCode||'').trim().toUpperCase();
   if(code.length!==4){toast(tr('enter4'));return}
   S.online=true;S.code=code;netClose();
-  if(peerOK()){
+  let viaFB=false;
+  if(FB.supported()){
+    toast(tr('connecting'),9000);
+    if(await FB.ready()){
+      S.me.id=FB.uid;
+      const st0=await FB.peek(code);
+      if(st0&&st0.phase!=='closed'){
+        const ph=await FB.getPw(code);
+        if(ph){
+          const mine=S.joinPw?await fbHash(S.joinPw):'';
+          if(mine!==ph){
+            S.code='';const had=!!S.joinPw;S.needPw=true;toast(had?tr('wrongPw'):tr('needPw'),3500);render();const i=$('#jpw');if(i)i.focus();return;
+          }
+        }
+        viaFB=true;FB.enterRoom(code);NET.myPw=S.joinPw||'';
+      }
+    }
+  }
+  if(viaFB){}
+  else if(peerOK()){
     toast(tr('connecting'),9000);
     try{await joinPeer(code,S.joinPw);Store.mode='mem'}
     catch(e){
@@ -2041,7 +2210,7 @@ async function joinRoom(){
   }else Store.mode='storage';
   const st=await Store.get(K('s'));
   if(!st||st.phase==='closed'){clearLast();toast(tr('notFound'));S.code='';netClose();return}
-  S.host=st.host===S.me.id;
+  S.host=FB.active?false:st.host===S.me.id;
   const inside=st.players.some(p=>p.id===S.me.id);
   if(!inside){
     if(st.phase!=='lobby'){toast(tr('startedAlready'));S.code='';netClose();return}
@@ -2054,7 +2223,12 @@ async function joinRoom(){
 async function leaveRoom(){
   clearLast();stopPoll();
   try{
-    if(S.code&&S.st){
+    if(S.code&&S.st&&FB.active){
+      const me=S.me.id;
+      const others=[...FB.present].some(id=>id!==me&&S.st.players.some(p=>p.id===id&&!p.bot));
+      if(!others)await FB.removeRoom(S.code);      /* 最後一個人離開：把房間清掉 */
+      else if(S.st.phase!=='play')await Store.del(K('j:'+me));
+    }else if(S.code&&S.st){
       if(S.host){
         const others=S.st.phase==='play'&&[...NET.conns].some(c=>c.auth&&c.pid&&c.pid!==S.me.id&&S.st.players.some(p=>p.id===c.pid&&!p.bot&&!p.auto));
         if(others)flushSnap();
@@ -2130,6 +2304,7 @@ async function poll(){
       const rx=await Store.get(K('rx'));
       if(rx&&rx.n!==S.rxSeen)showReact(rx);
     }
+    if(FB.active)await fbTick();
     if(S.host&&S.st&&S.st.phase==='lobby')await hostLobbySync();
     if(S.host)hostDuties();
   }finally{polling=false}
@@ -2210,6 +2385,7 @@ async function finishTurn(pid,table,rack,played){
   else if(st.pool.length){drawn=st.pool.pop();rack=rack.concat(drawn);st.passes=0;msg={k:'draw',id:pid}}
   else{st.passes=(st.passes||0)+1;msg={k:'pass',id:pid}}
   pl.n=rack.length;
+  const prevRack=FB.active?await getRack(pid):null;
   if(!await setRack(pid,rack))return false;
   let winner=null;
   if(rack.length===0)winner=pid;
@@ -2224,10 +2400,27 @@ async function finishTurn(pid,table,rack,played){
     msg={k:'win',id:winner};
   }else{st.turn=(st.turn+1)%st.players.length;st.seq++}
   st.msg=msg;st.v++;
-  if(!await Store.set(K('s'),st))return false;
+  if(!await Store.set(K('s'),st)){if(prevRack)await setRack(pid,prevRack);return false}
   S.st=st;
   if(pid===S.me.id){if(drawn!==null)S.fresh=drawn;sfx(drawn!==null?'draw':played>0?'done':'ui')}
   return true;
+}
+/* Firebase 模式：每輪詢一次，由「代打負責人」處理接手、離線代打、回來接回 */
+async function fbTick(){
+  const st=S.st;if(!st||!FB.present.size)return;
+  const me=S.me.id,L=FB.leader(st);
+  S.host=(L===me);
+  const meP=st.players.find(p=>p.id===me);
+  if(meP&&meP.auto&&st.phase==='play')goBack(me);
+  if(!S.host)return;
+  if(st.host!==me&&st.phase!=='closed'){
+    const n=clone(st);n.host=me;n.v++;
+    if(await Store.set(K('s'),n)){S.st=n;render()}
+    return;
+  }
+  if(st.phase!=='play')return;
+  FB.goneFor(st,me,5000).forEach(id=>{const p=st.players.find(x=>x.id===id);if(p&&!p.auto)goAway(id)});
+  st.players.forEach(p=>{if(!p.bot&&p.id!==me&&p.auto&&FB.present.has(p.id))goBack(p.id)});
 }
 /* 玩家離開：牌放回牌堆、輪次順延；只剩一人就直接結束 */
 function handleLeave(pid){
@@ -2240,7 +2433,8 @@ let awaying=Promise.resolve();
 function goAway(pid){awaying=awaying.then(()=>setAuto(pid,true)).catch(()=>{});return awaying}
 function goBack(pid){awaying=awaying.then(()=>setAuto(pid,false)).catch(()=>{});return awaying}
 async function setAuto(pid,on){
-  if(!S.host||!pid||pid===S.me.id)return;
+  if(!pid)return;
+  if(pid===S.me.id){if(on)return}else if(!S.host)return;
   const cur=await Store.get(K('s'));
   if(!cur||cur.phase!=='play')return;
   const p=cur.players.find(x=>x.id===pid);if(!p||p.bot)return;
@@ -2626,7 +2820,7 @@ document.addEventListener('input',e=>{
   if(id==='nname')S.nameDraft=e.target.value;
   if(id==='code'){S.joinCode=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'')}
   if(id==='jpw')S.joinPw=e.target.value;
-  if(id==='hostpw')NET.pw=e.target.value.slice(0,8);
+  if(id==='hostpw'){NET.pw=e.target.value.slice(0,8);if(FB.active&&S.code){clearTimeout(S.pwT);const c=S.code,v=NET.pw;S.pwT=setTimeout(()=>FB.setPw(c,v),400)}}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='nname'){e.preventDefault();const b=document.querySelector('[data-act=confirmname]');if(b)b.click()}});
 document.addEventListener('change',e=>{if(e.target.id==='name'||e.target.id==='pname')savePrefs()});
@@ -2643,7 +2837,7 @@ document.addEventListener('change',e=>{if(e.target.id==='name'||e.target.id==='p
   render();
   if(S.needName)openModal('name');
   if(S.fromLink&&S.joinCode.length===4)toast(tr('fromLink',S.joinCode),3500);
-  remoteOK=peerOK()||await probe();
+  remoteOK=peerOK()||FB.supported()||await probe();
   const ae=document.activeElement;
   if(['welcome','custom','join','settings'].includes(S.screen)&&!(ae&&ae.tagName==='INPUT'))render();
 })();
