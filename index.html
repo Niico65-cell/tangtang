@@ -661,6 +661,10 @@ html[data-theme="ins"] .plate.bad{box-shadow:0 0 0 2px var(--plate-bad),0 3px 8p
 .chform input{flex:1;min-width:0;margin:0!important}
 .chform .btn{width:auto;margin:0!important;padding:11px 18px;font-size:15px;flex:none}
 @media (prefers-reduced-motion:reduce){.fl-rx,.fl-ch{animation:none}}
+/* 牌組標籤（順子／同號／還不能成立）永遠單行，不會擠成直排而蓋住牌 */
+.plate .kind{white-space:nowrap;max-width:none;pointer-events:none}
+.game.hassel .plate .kind{pointer-events:auto}
+.plate.bad{min-width:104px}
 
 </style>
 </head>
