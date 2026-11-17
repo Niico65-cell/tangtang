@@ -16,32 +16,29 @@ html.embedded{--sat:0px}
    ===================================================================== */
 :root{
   /* ---- 台式可愛（預設）---- */
-  --bg:#fdf0f5;
+  --bg:#fbf1f4;
   --bg-img:
-    radial-gradient(circle at 8% 4%,#ffd3e4 0,transparent 38%),
-    radial-gradient(circle at 96% 14%,#dfe2ff 0,transparent 42%),
-    radial-gradient(circle at 78% 100%,#ffe8c6 0,transparent 38%);
+    radial-gradient(circle at 8% 4%,#f9dce7 0,transparent 36%),
+    radial-gradient(circle at 96% 14%,#e6e8fa 0,transparent 40%);
   --surface:#ffffff; --surface-2:#fff4f8; --line:#f0d2df; --line-strong:#e3b3c7;
   --ink:#43324d; --ink2:#665071; --ink-inv:#ffffff;
-  --accent:#d6457a; --accent-d:#b03160; --accent-soft:#ffe2ed; --accent-ink:#ffffff;
+  --accent:#c4527f; --accent-d:#9c3a62; --accent-soft:#fbe4ec; --accent-ink:#ffffff;
   --alt:#5878e0; --alt-d:#3d58b8;
   --good:#12805a; --good-soft:#d8f3e6; --bad:#c42f4e; --bad-soft:#ffe0e7; --warn-soft:#fff0c9; --warn:#8a5a00;
-  --c0:#d3382d; --c1:#6847dc; --c2:#b05f00; --c3:#12805a;
-  --r-card:24px; --r-ctl:18px; --r-btn:999px; --r-tile:.3;
+  --c0:#c8403a; --c1:#3a62c6; --c2:#b27508; --c3:#34303d;
+  --r-card:22px; --r-ctl:18px; --r-btn:999px; --r-tile:.3;
   --font:"Yuanti TC","Yuanti SC","Hiragino Maru Gothic ProN",ui-rounded,"SF Pro Rounded","PingFang TC","Noto Sans TC","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Microsoft JhengHei",system-ui,sans-serif;
   --font-num:var(--font);
-  --tile-bg:#fffdfb; --tile-edge:#ead7ec;
+  --tile-bg:#fffefd; --tile-edge:#e3d3dc;
   --tile-shadow:0 3px 0 var(--tile-edge),0 7px 12px rgba(150,90,160,.16);
   --tile-sel:0 0 0 3px var(--accent),0 12px 16px rgba(214,69,122,.3);
   --card-shadow:0 10px 30px rgba(220,130,170,.16),inset 0 0 0 2px #fff;
-  --btn-bg:linear-gradient(180deg,#ee6a98,#d6457a);
+  --btn-bg:linear-gradient(180deg,#d2658d,#c4527f);
   --btn-shadow:0 4px 0 var(--accent-d);
-  --felt:#fffafc;
-  --felt-img:
-    repeating-linear-gradient(0deg,rgba(255,132,170,.2) 0 20px,transparent 20px 40px),
-    repeating-linear-gradient(90deg,rgba(255,132,170,.2) 0 20px,transparent 20px 40px);
-  --felt-shadow:inset 0 0 0 4px #fff,0 10px 28px rgba(255,140,175,.22);
-  --plate-ok:#8be0b9; --plate-bad:#ff9fb7;
+  --felt:#f6e6ec;
+  --felt-img:none;
+  --felt-shadow:inset 0 0 0 2px #fff,inset 0 2px 14px rgba(160,90,120,.12);
+  --plate-ok:#7fcfa8; --plate-bad:#e98aa2;
   --modal-bg:rgba(67,50,77,.4);
   --dock-bg:rgba(255,255,255,.92);
   --av-line:#5a3d56;
@@ -77,13 +74,13 @@ html[data-theme="ins"]{
 html[data-theme="fun"]{
   /* ---- 活潑繽紛：藍頂欄 × 綠牌桌 × 黃手牌區 × 橘主按鈕 ---- */
   --bg:#e8f1ff;
-  --bg-img:radial-gradient(circle at 0 0,#ffe9a8 0,transparent 38%),radial-gradient(circle at 100% 8%,#bfe0ff 0,transparent 42%),radial-gradient(circle at 80% 100%,#c9f2da 0,transparent 40%);
+  --bg-img:radial-gradient(circle at 100% 8%,#cfe3fb 0,transparent 42%);
   --surface:#ffffff; --surface-2:#f3f7ff; --line:#cfdcf2; --line-strong:#9db6e0;
   --ink:#14213d; --ink2:#3f506e; --ink-inv:#ffffff;
-  --accent:#e0500c; --accent-d:#b13a04; --accent-soft:#ffe6d3; --accent-ink:#ffffff;
+  --accent:#d2602b; --accent-d:#a9461a; --accent-soft:#fbe6d8; --accent-ink:#ffffff;
   --alt:#2563eb; --alt-d:#1b4fc4;
   --good:#0b7f45; --good-soft:#d5f5e2; --bad:#d3233c; --bad-soft:#ffe0e5; --warn-soft:#fff0b0; --warn:#6e4a00;
-  --c0:#dc2430; --c1:#1d5fe0; --c2:#e0a000; --c3:#1b1f2a;
+  --c0:#c9323a; --c1:#2a59c2; --c2:#b87a00; --c3:#1d212c;
   --r-card:20px; --r-ctl:14px; --r-btn:16px; --r-tile:.22;
   --font:"Nunito","Rubik","PingFang TC","Noto Sans TC","Apple SD Gothic Neo","Noto Sans KR","Microsoft JhengHei",system-ui,sans-serif;
   --font-num:"Nunito","Rubik","PingFang TC",system-ui,sans-serif;
@@ -91,14 +88,14 @@ html[data-theme="fun"]{
   --tile-shadow:0 3px 0 var(--tile-edge),0 7px 11px rgba(0,40,20,.28);
   --tile-sel:0 0 0 3px #ffd43b,0 12px 16px rgba(0,40,20,.4);
   --card-shadow:0 8px 22px rgba(37,99,235,.14),inset 0 0 0 2px #fff;
-  --btn-bg:linear-gradient(180deg,#f57a2a,#e0500c);
+  --btn-bg:linear-gradient(180deg,#e0743f,#d2602b);
   --btn-shadow:0 4px 0 var(--accent-d);
-  --felt:#1f8f5f;
-  --felt-img:radial-gradient(rgba(255,255,255,.14) 1.2px,transparent 1.6px);
-  --felt-shadow:inset 0 0 0 4px #166d48,0 8px 20px rgba(22,109,72,.35);
-  --plate-ok:#ffd43b; --plate-bad:#ff5468;
+  --felt:#2d7a5c;
+  --felt-img:none;
+  --felt-shadow:inset 0 0 0 3px #236048,inset 0 3px 16px rgba(0,0,0,.18);
+  --plate-ok:#e6c55c; --plate-bad:#ef6a7c;
   --modal-bg:rgba(20,33,61,.55);
-  --dock-bg:rgba(255,243,196,.97);
+  --dock-bg:rgba(250,244,226,.98);
   --av-line:#14213d;
 }
 
@@ -489,11 +486,11 @@ html[data-theme="fun"] .btn.sec{color:var(--alt-d);box-shadow:inset 0 0 0 2.5px 
 .wrap.full>.cta{padding-top:8px}
 
 /* ---------- 活潑繽紛：各區塊色彩 ---------- */
-html[data-theme="fun"] .top{background:linear-gradient(180deg,#2563eb,#3b82f6);border-radius:0 0 var(--r-card) var(--r-card);padding-bottom:9px;margin-bottom:6px}
+html[data-theme="fun"] .top{background:linear-gradient(180deg,#3a63c0,#4a74d0);border-radius:0 0 var(--r-card) var(--r-card);padding-bottom:9px;margin-bottom:6px}
 html[data-theme="fun"] .pl{background:rgba(255,255,255,.92)}
-html[data-theme="fun"] .pl.turn{background:#fff7cc;box-shadow:inset 0 0 0 3px #ffd43b,0 6px 14px rgba(0,0,0,.2)}
+html[data-theme="fun"] .pl.turn{background:#fff7d8;box-shadow:inset 0 0 0 2px #e6c55c}
 html[data-theme="fun"] .menu{background:#fff;color:var(--alt-d);box-shadow:0 3px 0 #9db6e0}
-html[data-theme="fun"] .stat.me{background:#ffd43b;color:#4a3300;box-shadow:0 3px 0 #d9a900}
+html[data-theme="fun"] .stat.me{background:#f2d36a;color:#4a3300;box-shadow:none}
 html[data-theme="fun"] .stat.ready{background:var(--good);color:#fff;box-shadow:0 3px 0 #06532c}
 html[data-theme="fun"] .stat.warn{background:var(--bad);color:#fff;box-shadow:0 3px 0 #96172a}
 html[data-theme="fun"] .empty-tip,html[data-theme="ins"] .empty-tip{background:rgba(255,255,255,.14);color:#fff}
@@ -565,6 +562,105 @@ html[data-theme="ins"] .mepill{border-radius:12px}
 
 /* 上一位玩家剛放上桌的牌 */
 .tile.mvnew{box-shadow:0 0 0 3px var(--accent),0 6px 12px rgba(0,0,0,.18)}
+
+
+/* =====================================================================
+   v2 介面調整：玩家列縮小、層次、手牌成組標示
+   ===================================================================== */
+.top{padding:calc(6px + var(--sat)) 10px 4px;gap:6px}
+.pls{gap:5px}
+.pl{flex-direction:column;align-items:stretch;gap:1px;padding:5px 7px 4px;background:rgba(255,255,255,.6);box-shadow:none;min-height:0}
+.pl .r1{display:flex;align-items:center;gap:5px;min-width:0}
+.pl .avt{--s:22px}
+.pl .pn{font-size:12px;flex:1;min-width:0}
+.pl .r2{display:flex;align-items:center;gap:4px;font-size:11px;min-height:15px;white-space:nowrap;overflow:hidden}
+.pl .meTag{font-style:normal;font-size:10px;font-weight:900;color:var(--accent-d);background:var(--accent-soft);padding:0 5px;border-radius:6px}
+.pl.turn{background:var(--surface);box-shadow:inset 0 0 0 2px var(--accent)}
+html[data-theme="ins"] .pl.turn{box-shadow:inset 0 0 0 2px var(--accent)}
+.pl.turn .avt{animation:none}
+.pl .cnt{font-size:11px}
+.arr{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:900;color:var(--accent-d);background:var(--accent-soft);padding:0 6px;border-radius:8px;line-height:15px}
+.arr u{width:3px;height:3px;border-radius:50%;background:currentColor;text-decoration:none;animation:arrb 1s ease-in-out infinite}
+.arr u:nth-child(2){animation-delay:.15s}.arr u:nth-child(3){animation-delay:.3s}
+@keyframes arrb{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-3px);opacity:1}}
+.menu{width:36px;height:36px;font-size:17px;box-shadow:inset 0 0 0 1px var(--line)}
+html[data-theme="fun"] .menu{box-shadow:none}
+.game .stat,.game .stat.me,.game .stat.warn,.game .stat.ready{box-shadow:none!important;margin:2px 10px 5px;padding:5px 12px;font-size:13px;font-weight:800;background:transparent;color:var(--ink2)}
+.game .stat.me{background:var(--accent-soft);color:var(--accent-d)}
+.game .stat.warn{background:var(--bad-soft);color:var(--bad)}
+.game .stat.ready{background:var(--good-soft);color:var(--good)}
+html[data-theme="ins"] .game .stat.me{background:var(--accent);color:var(--accent-ink)}
+html[data-theme="fun"] .game .stat.me{background:#f2d36a;color:#4a3300}
+html[data-theme="fun"] .game .stat.ready{background:var(--good);color:#fff}
+html[data-theme="fun"] .game .stat.warn{background:var(--bad);color:#fff}
+.stat .avt{--s:18px}
+.cloth{margin:0 8px 6px;padding:16px 8px 8px;gap:14px 6px}
+.cloth.live{outline:2px dashed var(--accent);outline-offset:-5px}
+.plate{box-shadow:0 0 0 2px var(--plate-ok),0 3px 8px rgba(40,30,60,.1)}
+.plate.bad{box-shadow:0 0 0 2px var(--plate-bad),0 3px 8px rgba(40,30,60,.1)}
+html[data-theme="ins"] .plate,html[data-theme="ins"] .plate.bad{box-shadow:0 0 0 2px var(--plate-ok),0 3px 8px rgba(0,0,0,.25)}
+html[data-theme="ins"] .plate.bad{box-shadow:0 0 0 2px var(--plate-bad),0 3px 8px rgba(0,0,0,.25)}
+.game:not(.hassel) .plus{display:none}
+.game.hassel .plate{cursor:pointer}
+.plus{width:28px;height:28px;font-size:17px;animation:plpop .25s ease-out}
+@keyframes plpop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.game.hassel .plate:not(.bad){box-shadow:0 0 0 2.5px var(--accent),0 3px 10px rgba(40,30,60,.14)}
+.hintfab{width:46px;height:46px;font-size:22px}
+.dock{padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+.bar{gap:6px;padding:0 0 6px}
+.bar .chip{padding:7px 12px;font-size:13px}
+.bar .chip.ico{padding:7px 10px;margin-left:auto}
+.rack{padding:8px 2px 6px;gap:8px 5px}
+.clock{width:42px;height:42px;font-size:15px}
+.endrow{margin-top:6px}
+#toast{top:calc(96px + var(--sat))}
+.tile{--tile-r:calc(var(--tw)*var(--r-tile))}
+.tile b{font-size:calc(var(--tw)*.6)}
+.tile.ms{margin-bottom:6px}
+.tile.ms::after{content:"";position:absolute;left:2px;right:2px;bottom:-7px;height:3px;border-radius:2px;background:var(--accent);opacity:.7}
+.tile.ms:not(.msl)::after{right:-7px}
+.tile.msf:not(:first-child){margin-left:8px}
+.tile.ms.msf::after{left:0}
+.tile.sel::after{display:none}
+.tile.mvnew{box-shadow:0 0 0 3px var(--accent),var(--tile-shadow)}
+@media (prefers-reduced-motion:reduce){.arr u,.plus{animation:none}}
+
+.pl .cnt{display:inline-flex;align-items:center;font-weight:900;font-size:12px}
+.pl .cnt::before{content:"";width:6px;height:9px;border:1.5px solid currentColor;border-radius:2px;margin-right:4px;opacity:.6}
+.plate .kind{z-index:3}
+.game.hassel .plate .kind{padding:3px 12px;top:-13px;box-shadow:0 0 0 2px var(--accent)}
+
+/* ====== 牌桌上的表情與聊天 ====== */
+#fl{position:fixed;left:8px;right:8px;z-index:60;pointer-events:none;overflow:hidden}
+.fl-rx{position:absolute;bottom:6%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;animation:rxup 2.7s ease-out forwards}
+.fl-rx .em{font-size:64px;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28))}
+.fl-rx .w{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:var(--ink);background:var(--surface);padding:2px 9px 2px 4px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.fl-rx .avt{--s:18px}
+@keyframes rxup{0%{transform:translate(-50%,30px) scale(.3);opacity:0}12%{transform:translate(-50%,0) scale(1.18);opacity:1}25%{transform:translate(-50%,-6px) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-190px) scale(1.05);opacity:0}}
+.fl-ch{display:flex;align-items:flex-start;gap:6px;width:fit-content;max-width:86%;margin:6px 0 0;padding:6px 12px 6px 7px;border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:0 3px 12px rgba(0,0,0,.22);font-size:14px;font-weight:700;animation:chin .25s ease-out;transition:opacity .4s}
+.fl-ch.out{opacity:0}
+.fl-ch .avt{--s:24px;margin-top:1px}
+.fl-ch b{display:block;font-size:11px;color:var(--accent-d);font-weight:900}
+.fl-ch span{min-width:0;overflow-wrap:anywhere}
+@keyframes chin{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.chatb{position:relative;margin-left:auto!important}
+.chatb+.ico{margin-left:0!important}
+.udot{position:absolute;top:-5px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-style:normal;font-size:11px;font-weight:900;display:grid;place-items:center}
+.chatm{background:rgba(0,0,0,.18)}
+.chlist{max-height:34dvh;min-height:70px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px 2px 8px}
+.chempty{text-align:center;margin:18px 0}
+.cm{display:flex;align-items:flex-start;gap:7px;font-size:14px;font-weight:600}
+.cm .avt{--s:24px;margin-top:1px}
+.cm span{background:var(--surface);padding:5px 10px;border-radius:14px;min-width:0;overflow-wrap:anywhere;box-shadow:inset 0 0 0 1px var(--line)}
+.cm b{display:block;font-size:11px;color:var(--ink2);font-weight:800}
+.cm.me{flex-direction:row-reverse}
+.cm.me span{background:var(--accent-soft)}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.quick .chip{padding:7px 12px;font-size:13px}
+.chform{display:flex;gap:8px;align-items:center;margin:0}
+.chform input{flex:1;min-width:0;margin:0!important}
+.chform .btn{width:auto;margin:0!important;padding:11px 18px;font-size:15px;flex:none}
+@media (prefers-reduced-motion:reduce){.fl-rx,.fl-ch{animation:none}}
 
 </style>
 </head>
@@ -730,7 +826,7 @@ const DIFFS=['easy','normal','hard'];
 /* ====== 風格 ====== */
 const THEMES={
   cute:{
-    suits:['🍚','🧋','🥚','🥬'],joker:'🏮',
+    suits:['●','▲','■','◆'],logoMark:['🍚','🧋','🥚','🥬'],joker:'★',
     conf:['🍚','🧋','🥚','🥬','🏮','✨','💖'],
     ic:{create:'🎀',solo:'🧸',hint:'💡',turn:'✨',draw:'🃏',trophy:'👑',again:'🎀',rules:'🍚',ok:'✓'}
   },
@@ -997,6 +1093,8 @@ zh:{
   mAway:w=>`${w} 斷線了，由電腦代打`,mBack:w=>`${w} 回來了`,mHostMv:w=>`原房主 ${w} 斷線，已換人當房主，由電腦代打`,reconnecting:'連線中斷，正在重新連線…',autoTag:'代打',
   rejoin:c=>`回到剛剛的牌局（房號 ${c}）`,
   liveNow:w=>`${w} 正在排牌…`,
+  arrTag:'整理中',
+  chatT:'聊天',chatPh:'輸入訊息…',chatSend:'送出',chatEmpty:'還沒有訊息，說聲嗨吧！',chatQuick:['你好','好牌！','等我一下','加油','哈哈','再來一局'],close:'關閉',
   menuTitle:'選單',skipOther:'讓目前的玩家抽牌跳過',kick:'請目前的玩家離開',leaveGame:'離開遊戲',keepPlaying:'繼續玩',
   rulesTitle:'玩法說明',gotIt:'知道了',jokerTag:'萬用',
   rvGoal:'每人 14 張牌，輪流出牌或抽牌，先把手牌出完的人獲勝。',
@@ -1008,7 +1106,7 @@ zh:{
   rvAddT:'接牌與重組',rvAdd:'手牌可以接在桌上的組合上，也可以拆開重排，只要結束時每一組都成立。',
   rvOpT:'操作方式',rvOp:'點選牌（可以多選）再按「＋ 新組合」；也可以直接拖曳牌到桌上、某一組，或在手牌裡自由排順序。',
   rulesList:()=>['這回合沒出牌就會抽一張。桌上原本的牌不能收回手牌。','贏家拿走其他人剩下的點數，萬用牌剩著算 30 點。'],
-  suitsCute:['滷肉飯','珍奶','滷蛋','青菜'],suitsIns:['圓','三角','方','菱'],
+  suitsCute:['紅','藍','黃','黑'],suitsIns:['圓','三角','方','菱'],
   bots:['小棉花','糖糖','布丁','奶茶','麻糬','可可'],defNames:['小可愛','糖果','布丁','棉花糖'],
   tutNext:'下一步',tutPrev:'上一步',tutSkip:'跳過教學',tutDone:'開始玩',
   tut:{
@@ -1077,6 +1175,8 @@ en:{
   mAway:w=>`${w} disconnected — the computer plays for them`,mBack:w=>`${w} is back`,mHostMv:w=>`Host ${w} dropped — a new host took over and the computer plays for them`,reconnecting:'Connection lost — reconnecting…',autoTag:'Auto',
   rejoin:c=>`Back to your game (room ${c})`,
   liveNow:w=>`${w} is arranging…`,
+  arrTag:'Sorting',
+  chatT:'Chat',chatPh:'Type a message…',chatSend:'Send',chatEmpty:'No messages yet — say hi!',chatQuick:['Hi','Nice!','Wait a sec','Go go','Haha','Again?'],close:'Close',
   menuTitle:'Menu',skipOther:'Draw & skip for the current player',kick:'Remove the current player',leaveGame:'Leave game',keepPlaying:'Keep playing',
   rulesTitle:'How to play',gotIt:'Got it',jokerTag:'WILD',
   rvGoal:'Everyone gets 14 tiles. Take turns playing or drawing — the first to empty their rack wins.',
@@ -1088,7 +1188,7 @@ en:{
   rvAddT:'Add & rearrange',rvAdd:'Add tiles to sets on the table, or split and rebuild them — as long as every set is valid when you finish.',
   rvOpT:'Controls',rvOp:'Tap tiles to select (several at once), then press “＋ New set” — or just drag tiles onto the table, onto a set, or around your rack to reorder.',
   rulesList:()=>['If you play nothing, you draw a tile. Tiles already on the table can’t go back to your rack.','The winner collects everyone else’s leftover points. A leftover joker counts as 30.'],
-  suitsCute:['Pork rice','Bubble tea','Tea egg','Greens'],suitsIns:['Circle','Triangle','Square','Diamond'],
+  suitsCute:['Red','Blue','Yellow','Black'],suitsIns:['Circle','Triangle','Square','Diamond'],
   bots:['Cotton','Candy','Pudding','Boba','Mochi','Cocoa'],defNames:['Sweetie','Candy','Pudding','Marshmallow'],
   tutNext:'Next',tutPrev:'Back',tutSkip:'Skip tutorial',tutDone:'Let’s play',
   tut:{
@@ -1157,6 +1257,8 @@ ko:{
   mAway:w=>`${w} 연결이 끊겨 컴퓨터가 대신 플레이해요`,mBack:w=>`${w} 돌아왔어요`,mHostMv:w=>`방장 ${w} 연결 끊김 — 새 방장이 이어받고 컴퓨터가 대신 플레이해요`,reconnecting:'연결이 끊겼어요. 다시 연결 중…',autoTag:'자동',
   rejoin:c=>`방금 하던 게임으로 (방 ${c})`,
   liveNow:w=>`${w} 님이 타일을 놓는 중…`,
+  arrTag:'정리 중',
+  chatT:'채팅',chatPh:'메시지 입력…',chatSend:'보내기',chatEmpty:'아직 메시지가 없어요. 인사해 보세요!',chatQuick:['안녕','굿!','잠깐만','화이팅','ㅋㅋ','한 판 더'],close:'닫기',
   menuTitle:'메뉴',skipOther:'현재 플레이어 대신 뽑고 넘기기',kick:'현재 플레이어 내보내기',leaveGame:'게임 나가기',keepPlaying:'계속하기',
   rulesTitle:'게임 방법',gotIt:'알겠어요',jokerTag:'조커',
   rvGoal:'각자 타일 14장으로 시작해 차례대로 내거나 뽑아요. 손패를 먼저 비우는 사람이 승리해요.',
@@ -1168,7 +1270,7 @@ ko:{
   rvAddT:'이어 붙이기와 재배치',rvAdd:'테이블 묶음에 타일을 이어 붙이거나 쪼개 다시 만들 수 있어요. 끝날 때 모든 묶음이 성립하면 돼요.',
   rvOpT:'조작 방법',rvOp:'타일을 탭해 선택(여러 장 가능)하고 「＋ 새 묶음」을 누르거나, 타일을 테이블·묶음 위로 끌어다 놓으세요. 손패 안에서 끌어 순서도 바꿀 수 있어요.',
   rulesList:()=>['아무것도 내지 않으면 타일을 한 장 뽑아요. 테이블 위의 원래 타일은 손패로 가져올 수 없어요.','승자는 다른 사람들의 남은 점수를 가져가요. 남은 조커는 30점이에요.'],
-  suitsCute:['루러우판','버블티','차예단','채소'],suitsIns:['원','삼각형','사각형','마름모'],
+  suitsCute:['빨강','파랑','노랑','검정'],suitsIns:['원','삼각형','사각형','마름모'],
   bots:['몽실','솜사탕','푸딩','밀크티','모찌','코코'],defNames:['귀염이','사탕','푸딩','솜사탕'],
   tutNext:'다음',tutPrev:'이전',tutSkip:'건너뛰기',tutDone:'시작하기',
   tut:{
@@ -1392,8 +1494,8 @@ const FB={
     this.detach();
     this.code=code;this.active=true;this.cache={};this.present=new Set();this.absent={};
     const base=this.db.ref('rooms/'+code);
-    ['s','rx','live'].forEach(n=>{
-      const r=base.child(n),cb=snap=>{this.cache[n]=snap.val();if(n==='live'&&this.onLive)this.onLive()};
+    ['s','rx','live','c'].forEach(n=>{
+      const r=base.child(n),cb=snap=>{this.cache[n]=snap.val();if(n==='live'&&this.onLive)this.onLive();if(n==='c'&&this.onChat)this.onChat()};
       r.on('value',cb);this.offs.push(()=>r.off('value',cb));
     });
     const pr=base.child('pres'),pc=snap=>{this.present=new Set(Object.keys(snap.val()||{}))};
@@ -1746,9 +1848,27 @@ function recordResult(st){
 const winRate=s=>s.g?Math.round(s.w*100/s.g):0;
 
 /* ====== 畫面 ====== */
+/* 手牌裡「相鄰就已經成組」的牌：加底線與間隔，一眼看出手上有哪些現成牌組 */
+function rackSegs(rack){
+  const seg=new Map();let i=0;
+  while(i<rack.length){
+    let n=0;
+    for(let j=Math.min(rack.length,i+13);j>=i+3;j--){if(analyze(rack.slice(i,j)).ok){n=j-i;break}}
+    if(n){const mem=rack.slice(i,i+n);for(let k=0;k<n;k++)seg.set(rack[i+k],{f:k===0,l:k===n-1,mem});i+=n}else i++;
+  }
+  return seg;
+}
+function segCls(id,mine){
+  if(mine||!S.segs)return '';
+  const g=S.segs.get(id);return g?' ms'+(g.f?' msf':'')+(g.l?' msl':''):'';
+}
+function groupOf(id){
+  if(S.segs&&S.segs.has(id)&&S.rack.includes(id))return S.segs.get(id).mem.slice();
+  const pl=S.table.find(x=>x.includes(id));return pl?pl.slice():null;
+}
 function tileH(id,mine){
   const t0=T(id),th=TH();
-  const cls='tile '+(t0.j?'jk':'c'+t0.c)+(S.sel.has(id)?' sel':'')+(mine&&S.startRackSet.has(id)?' mine':'')+(S.fresh===id?' fresh':'')+(S.liveNew&&S.liveNew.has(id)?' lvnew':'')+(S.moved&&S.moved.has(id)?' mvnew':'');
+  const cls='tile '+(t0.j?'jk':'c'+t0.c)+(S.sel.has(id)?' sel':'')+(mine&&S.startRackSet.has(id)?' mine':'')+(S.fresh===id?' fresh':'')+(S.liveNew&&S.liveNew.has(id)?' lvnew':'')+(S.moved&&S.moved.has(id)?' mvnew':'')+segCls(id,mine);
   const label=t0.j?tr('jokerTag'):tr(S.pref.theme==='ins'?'suitsIns':'suitsCute')[t0.c]+' '+t0.n;
   const inner=t0.j?`<b>${th.joker}</b><i>${esc(tr('jokerTag'))}</i>`:`<b>${t0.n}</b><i>${th.suits[t0.c]}</i>`;
   return `<button type="button" class="${cls}" data-t="${id}" aria-label="${esc(label)}">${inner}</button>`;
@@ -1768,7 +1888,7 @@ function settingsH(){
 }
 function logoH(){
   const th=TH();
-  return `<div class="logo" aria-label="${esc(tr('title'))}">${tr('logo').map((x,i)=>`<div class="tile c${i} l${i+1}"><b>${esc(x)}</b><i>${th.suits[i]}</i></div>`).join('')}</div>`;
+  return `<div class="logo" aria-label="${esc(tr('title'))}">${tr('logo').map((x,i)=>`<div class="tile c${i} l${i+1}"><b>${esc(x)}</b><i>${(th.logoMark||th.suits)[i]}</i></div>`).join('')}</div>`;
 }
 
 const SVG_BACK='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
@@ -2013,21 +2133,25 @@ function rGame(){
   const played=playedCount();
   const ti=turnInfo();
   const selOnTableMine=[...S.sel].some(id=>S.startRackSet.has(id)&&!S.rack.includes(id));
-  const plHTML=st.players.map((p,i)=>`<div class="pl ${i===st.turn&&!over?'turn':''}">${S.bubble&&S.bubble.id===p.id?`<span class="bub">${S.bubble.e}</span>`:''}${avH(p.av)}<span class="pn">${esc(pname(p))}${p.id===S.me.id?`<i class="meTag">${tr('meTag')}</i>`:''}${p.auto?`<i class="meTag">${tr('autoTag')}</i>`:''}</span><span class="cnt ${p.meld?'ok':''}">${tr('cnt',p.n)}${p.meld?' ✓':''}</span></div>`).join('');
+  const arrOn=!my&&!over&&S.live&&S.online;
+  const plHTML=st.players.map((p,i)=>{
+    const isTurn=i===st.turn&&!over,arr=arrOn&&isTurn;
+    const tags=(p.id===S.me.id?`<i class="meTag">${esc(tr('meTag').replace(/[()（）\s]/g,''))}</i>`:'')+(p.auto?`<i class="meTag">${tr('autoTag')}</i>`:'');
+    return `<div class="pl ${isTurn?'turn':''} ${arr?'arring':''} ${p.id===S.me.id?'me':''}"><div class="r1">${avH(p.av)}<span class="pn">${esc(pname(p))}</span></div><div class="r2">${arr?`<span class="arr">${tr('arrTag')}<u></u><u></u><u></u></span>`:`${tags}<span class="cnt ${p.meld?'ok':''}" title="${esc(tr('cnt',p.n))}" aria-label="${esc(tr('cnt',p.n))}">${p.n}${p.meld?' ✓':''}</span>`}</div></div>`;
+  }).join('');
   const lvOn=!my&&!over&&S.live&&S.online;
   const VT=lvOn?S.live.table:S.table;
   const table=VT.map((s,i)=>{
     const a=analyze(s);
-    return `<div class="plate ${a.ok?'':'bad'}"><span class="kind">${a.ok?(a.type==='run'?tr('kRun'):tr('kGroup')):tr('kBad')}</span><div class="ts">${s.map(id=>tileH(id,true)).join('')}</div>${my?`<button class="plus" data-act="addto" data-v="${i}" aria-label="${esc(tr('addToSet'))}">＋</button>`:''}</div>`;
+    return `<div class="plate ${a.ok?'':'bad'}" ${my?`data-act="plate" data-v="${i}"`:''}><span class="kind">${a.ok?(a.type==='run'?tr('kRun'):tr('kGroup')):tr('kBad')}</span><div class="ts">${s.map(id=>tileH(id,true)).join('')}</div>${my?`<button class="plus" data-act="addto" data-v="${i}" aria-label="${esc(tr('addToSet'))}">＋</button>`:''}</div>`;
   }).join('');
   const endLabel=played===0?(st.pool.length?IC('draw')+tr('draw'):tr('skip')):tr('done')+' ✓';
-  return `<div class="game ${my?'myturn':''}">
+  return `<div class="game ${my?'myturn':''} ${my&&S.sel.size?'hassel':''}">
     <div class="top"><div class="pls">${plHTML}</div><button class="menu" data-act="menu" aria-label="${esc(tr('menuAria'))}">⋯</button></div>
     <div class="stat ${ti.cls}">${ti.html}</div>
     ${tutPanelH()}
-    <div class="clothwrap">${lvOn?`<div class="livebadge"><i></i>${tr('liveNow',pname(st.players[st.turn]))}</div>`:''}<div class="cloth ${lvOn?'live':''}" id="table">
+    <div class="clothwrap"><div class="cloth ${lvOn?'live':''}" id="table">
       ${table||''}
-      ${my?`<button class="newset" data-act="newset">${tr('newSet')}</button>`:''}
       ${!VT.length?`<div class="empty-tip">${tr('emptyTable')}${my?'<br>'+tr('emptyTip'):''}</div>`:''}
     </div>
       ${my&&hintMax()!==0?`<button type="button" class="hintfab ${hintMax()>0&&!hintPaid()&&S.hintLeft<=0?'empty':''}" data-act="hint" aria-label="${esc(tr('hint'))}">${S.pref.theme==='cute'?'💡':SVG_BULB}${hintMax()>0?`<b>${S.hintLeft}</b>`:''}</button>`:''}
@@ -2038,11 +2162,12 @@ function rGame(){
         ${selOnTableMine?`<button class="chip" data-act="back">${tr('back')}</button>`:''}
         <button class="chip" data-act="undo">${tr('undo')}</button>`:''}
         <button class="chip" data-act="sort">${S.sortMode==='color'?tr('sortNum'):tr('sortColor')}</button>
-        <button class="chip ${S.rxOpen?'on':''}" data-act="react">${S.pref.theme==='cute'?'😊 ':''}${tr('react')}</button>
+        ${S.online?`<button class="chip ico chatb" data-act="chat" aria-label="${esc(tr('chatT'))}">💬${S.chatUnread?`<i class="udot">${S.chatUnread>9?'9+':S.chatUnread}</i>`:''}</button>`:''}
+        <button class="chip ico ${S.rxOpen?'on':''}" data-act="react" aria-label="${esc(tr('react'))}">${S.pref.theme==='ins'?'☺':'😊'}</button>
         ${S.sel.size?`<button class="chip" data-act="clearsel">${tr('clearSel')}</button>`:''}
       </div>
       ${S.rxOpen?`<div class="rxrow">${REACT[S.pref.theme].map(e=>`<button type="button" data-act="rx" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>`:''}
-      <div class="rack" id="rack">${S.rack.map(id=>tileH(id,false)).join('')||`<div class="empty-tip" style="padding:14px">${tr('rackEmpty')}</div>`}</div>
+      <div class="rack" id="rack">${(S.segs=rackSegs(S.rack),S.rack.map(id=>tileH(id,false)).join(''))||`<div class="empty-tip" style="padding:14px">${tr('rackEmpty')}</div>`}</div>
       <div class="endrow">
         <div class="clock" id="clockwrap"><span id="timer">∞</span></div>
         <div class="pool"><b>${st.pool.length}</b>${tr('pool')}</div>
@@ -2077,10 +2202,10 @@ function fitTiles(){
   const rk=$('#rack'),tb=$('#table');if(!rk||!tb)return;
   const big=window.innerWidth>=720,r=54/40;
   const setv=(el,w)=>{el.style.setProperty('--tw',w+'px');el.style.setProperty('--th',Math.round(w*r)+'px')};
-  let w=big?46:40;setv(rk,w);
+  let w=big?54:40;setv(rk,w);
   const cap=Math.max(84,window.innerHeight*0.26);
   while(rk.scrollHeight>cap&&w>20){w-=2;setv(rk,w)}
-  let t1=big?40:34;setv(tb,t1);
+  let t1=big?58:42;setv(tb,t1);
   while(tb.scrollHeight>tb.clientHeight+1&&t1>18){t1-=2;setv(tb,t1)}
 }
 window.addEventListener('resize',()=>{if(S.screen==='game'&&!DR.act)fitTiles()});
@@ -2295,7 +2420,7 @@ async function leaveRoom(){
 function resetHome(){
   stopPoll();netClose();Store.mode='mem';
   S.screen='welcome';S.tutM=null;S.st=null;S.code='';{const t=$('#toast');if(t)t.classList.remove('show')}S.host=false;S.turnSeq=-1;S.gid=null;S.sel=new Set();
-  S.joinCode='';S.joinPw='';S.needPw=false;S.rack=[];S.rxSeen=undefined;S.bubble=null;S.rxOpen=false;NET.pw='';
+  S.joinCode='';S.joinPw='';S.needPw=false;S.rack=[];S.rxSeen=undefined;S.bubble=null;S.rxOpen=false;NET.pw='';chatReset();
   openModal(null);render();
 }
 async function writeLobby(st){st.v++;if(await Store.set(K('s'),st)){S.st=st;render()}}
@@ -2353,7 +2478,7 @@ async function poll(){
       const rx=await Store.get(K('rx'));
       if(rx&&rx.n!==S.rxSeen)showReact(rx);
     }
-    if(S.screen==='game'&&S.online)await liveRead();
+    if(S.screen==='game'&&S.online){await liveRead();await chatRead()}
     if(FB.active)await fbTick();
     if(S.host&&S.st&&S.st.phase==='lobby')await hostLobbySync();
     if(S.host)hostDuties();
@@ -2537,14 +2662,96 @@ async function sendReact(e){
 }
 function showReact(o){
   if(!o||S.rxSeen===o.n)return;S.rxSeen=o.n;
-  S.bubble={id:o.id,e:o.e};clearTimeout(S.bubT);
-  S.bubT=setTimeout(()=>{S.bubble=null;if(S.screen==='game')render()},2600);
-  if(S.screen==='game')render();
+  pushFloat('rx',o.id,o.e);
+}
+
+/* ====== 牌桌上的浮動訊息：表情（大）與聊天泡泡 ====== */
+function floatLayer(){
+  let el=document.getElementById('fl');
+  if(!el){el=document.createElement('div');el.id='fl';el.setAttribute('aria-live','polite');document.body.appendChild(el)}
+  const t=document.getElementById('table'),r=t?t.getBoundingClientRect():null;
+  el.style.top=(r?r.top:120)+'px';el.style.height=(r?r.height:300)+'px';
+  return el;
+}
+function pushFloat(kind,pid,text){
+  if(S.screen!=='game')return;
+  const p=S.st&&S.st.players.find(x=>x.id===pid);
+  const who=p?pname(p):'';
+  const el=floatLayer(),d=document.createElement('div');
+  if(kind==='rx'){
+    d.className='fl-rx';
+    d.style.left=(18+Math.random()*64)+'%';
+    d.innerHTML=`<span class="em">${esc(text)}</span><span class="w">${p?avH(p.av):''}${esc(who)}</span>`;
+    el.appendChild(d);setTimeout(()=>d.remove(),2800);
+  }else{
+    d.className='fl-ch';
+    d.innerHTML=`${p?avH(p.av):''}<span><b>${esc(who)}</b>${esc(text)}</span>`;
+    el.appendChild(d);
+    while(el.querySelectorAll('.fl-ch').length>3)el.querySelector('.fl-ch').remove();
+    setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),400)},5200);
+  }
+}
+
+/* ====== 文字聊天（只在連線房間；每位玩家只寫自己的 c:<id>，不會互相覆蓋）====== */
+const CHAT_MAX=30;
+S.chat=[];S.chatSeen=new Set();S.chatInit=false;S.chatCool=0;S.chatUnread=0;
+function chatReset(){S.chat=[];S.chatSeen=new Set();S.chatInit=false;S.chatUnread=0}
+async function chatRead(){
+  if(!S.online||!S.code)return;
+  let all=[];
+  try{
+    if(FB.active){all=Object.values(FB.cache.c||{}).map(v=>{try{return JSON.parse(v)}catch(e){return null}})}
+    else{for(const k of await Store.list(K('c:')))all.push(await Store.get(k))}
+  }catch(e){return}
+  const fresh=[];
+  for(const o of all){
+    if(!o||typeof o.t!=='string'||o.n===undefined||S.chatSeen.has(o.n))continue;
+    S.chatSeen.add(o.n);
+    if(S.chatInit&&o.id!==S.me.id)fresh.push(o);
+  }
+  S.chatInit=true;
+  fresh.sort((a,b)=>a.ts-b.ts).forEach(o=>{
+    S.chat.push(o);if(S.chat.length>40)S.chat.shift();
+    pushFloat('chat',o.id,o.t);sfx('tap');
+    if(S.modal==='chat')chatPaint();else{S.chatUnread++;if(S.screen==='game')render()}
+  });
+}
+FB.onChat=()=>{if(S.screen==='game')chatRead()};
+async function sendChat(text){
+  text=String(text||'').replace(/\s+/g,' ').trim().slice(0,CHAT_MAX);
+  if(!text||Date.now()-S.chatCool<800)return;S.chatCool=Date.now();
+  const o={n:Date.now()+Math.random(),id:S.me.id,t:text,ts:Date.now()};
+  S.chatSeen.add(o.n);S.chat.push(o);if(S.chat.length>40)S.chat.shift();
+  pushFloat('chat',S.me.id,text);
+  if(S.modal==='chat')chatPaint();
+  await Store.set(K('c:'+S.me.id),o);
+}
+function chatListH(){
+  if(!S.chat.length)return `<p class="note chempty">${tr('chatEmpty')}</p>`;
+  return S.chat.slice(-25).map(o=>{
+    const p=S.st&&S.st.players.find(x=>x.id===o.id),me=o.id===S.me.id;
+    return `<div class="cm ${me?'me':''}">${p?avH(p.av):''}<span><b>${esc(p?pname(p):'')}</b>${esc(o.t)}</span></div>`;
+  }).join('');
+}
+function chatPaint(){const l=document.getElementById('chlist');if(l){l.innerHTML=chatListH();l.scrollTop=l.scrollHeight}}
+function chatH(){
+  return `<div class="modal chatm" data-act="closem"><div class="sheet">
+    <h3>${tr('chatT')}</h3>
+    <div class="chlist" id="chlist">${chatListH()}</div>
+    <div class="quick">${tr('chatQuick').map(q=>`<button type="button" class="chip" data-act="chq" data-v="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+    <form class="chform" data-act="none" onsubmit="return false"><input id="chtext" maxlength="${CHAT_MAX}" placeholder="${esc(tr('chatPh'))}" autocomplete="off" enterkeyhint="send"><button type="button" class="btn" data-act="chsend">${tr('chatSend')}</button></form>
+    <button class="btn ghost" data-act="closem">${tr('close')}</button></div></div>`;
 }
 
 /* ====== 玩家操作 ====== */
 function onTile(id){
   if(!isMyTurn()){toast(tr('notYet'));return}
+  const now=Date.now(),lt=S.lastTap;
+  if(lt&&lt.id===id&&now-lt.t<420){
+    const g=groupOf(id);
+    if(g&&g.length>1){S.sel=new Set(g);S.lastTap=null;sfx('tap');render();return}
+  }
+  S.lastTap={id,t:now};
   if(S.sel.has(id))S.sel.delete(id);else S.sel.add(id);
   sfx('tap');render();
 }
@@ -2775,7 +2982,8 @@ function nameH(){
 }
 function openModal(kind){
   S.modal=kind;
-  $('#modal').innerHTML=kind==='rules'?rulesH():kind==='menu'?menuH():kind==='profile'?profileH():kind==='name'?nameH():'';
+  $('#modal').innerHTML=kind==='rules'?rulesH():kind==='menu'?menuH():kind==='chat'?chatH():kind==='profile'?profileH():kind==='name'?nameH():'';
+  if(kind==='chat'){S.chatUnread=0;chatPaint();render()}
 }
 function inviteLink(){
   try{if(/^https?:$/.test(location.protocol))return location.href.split(/[?#]/)[0]+'?room='+S.code}catch(e){}
@@ -2808,7 +3016,7 @@ document.addEventListener('click',e=>{
     onTile(+el.dataset.t);return;
   }
   const act=el.dataset.act,v=el.dataset.v;
-  if(!['newset','addto','end','rx','closem','mute','setsfx','hint'].includes(act))sfx('ui');
+  if(!['newset','addto','end','rx','closem','mute','setsfx','hint','chq','chsend','chat'].includes(act))sfx('ui');
   if(act==='closem'&&el.classList.contains('modal')&&e.target!==el)return;
   switch(act){
     case'av':{const n=$('#pname');if(n&&S.modal==='profile')S.me.name=n.value;S.me.av=v;savePrefs();render();if(S.modal==='profile')openModal('profile');break}
@@ -2859,8 +3067,12 @@ document.addEventListener('click',e=>{
     case'skip':openModal(null);forceSkip();break;
     case'kick':{openModal(null);if(S.st&&S.st.phase==='play'){const p=S.st.players[S.st.turn];if(p&&!p.bot&&!p.auto&&p.id!==S.me.id)removeFromGame(p.id)}break}
     case'react':S.rxOpen=!S.rxOpen;render();break;
+    case'chat':openModal('chat');setTimeout(()=>{const i=document.getElementById('chtext');if(i)i.focus()},50);break;
+    case'chq':sendChat(v);break;
+    case'chsend':{const i=document.getElementById('chtext');if(i){sendChat(i.value);i.value=''}break}
     case'rx':sendReact(v);break;
     case'sort':S.sortMode=S.sortMode==='color'?'num':'color';sortRack(S.rack,S.sortMode);render();break;
+    case'plate':if(isMyTurn()&&S.sel.size)moveSel(+v);break;
     case'undo':undo();break;
     case'hint':hint();break;
     case'newset':moveSel('new');break;
@@ -2878,7 +3090,8 @@ document.addEventListener('input',e=>{
   if(id==='jpw')S.joinPw=e.target.value;
   if(id==='hostpw'){NET.pw=e.target.value.slice(0,8);if(FB.active&&S.code){clearTimeout(S.pwT);const c=S.code,v=NET.pw;S.pwT=setTimeout(()=>FB.setPw(c,v),400)}}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='nname'){e.preventDefault();const b=document.querySelector('[data-act=confirmname]');if(b)b.click()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='chtext'){e.preventDefault();const b=document.querySelector('[data-act=chsend]');if(b)b.click();return}
+  if(e.key==='Enter'&&e.target.id==='nname'){e.preventDefault();const b=document.querySelector('[data-act=confirmname]');if(b)b.click()}});
 document.addEventListener('change',e=>{if(e.target.id==='name'||e.target.id==='pname')savePrefs()});
 
 (async()=>{
